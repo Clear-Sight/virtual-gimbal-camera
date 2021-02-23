@@ -1,6 +1,5 @@
 import cv2
 from .primes import primes
-from .io.inputAdapter import InputAdapter
 
 
 __version__ = "0.1.0"
