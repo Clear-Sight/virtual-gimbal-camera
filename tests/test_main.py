@@ -1,8 +1,9 @@
 import pytest
 import vgc
 
+
 def test_setup():
-    pass
+    assert 1 + 1 == 2
 
 def test_buffer():
     """ test for type Buffer """
@@ -10,7 +11,7 @@ def test_buffer():
     lst = [0,1,2,3]
     assert buf == []
 
-    for i in range(3):
+    for i in range(4):
         buf.push(i)
     assert buf == lst
 

@@ -1,1 +1,1 @@
-import buffer
+from . import buffer
