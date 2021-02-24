@@ -1,6 +1,6 @@
 import cv2
-from .primes import primes
-
+from primes import primes
+import buffer
 
 __version__ = "0.1.0"
 
