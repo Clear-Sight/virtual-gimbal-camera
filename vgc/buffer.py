@@ -25,3 +25,11 @@ class Buffer:
 
     def __eq__(self, other):
         return self._buffer == other
+
+    def __iadd__(self, other):
+        try:
+            for elm in other:
+                self.push(elm)
+            return self
+        except:
+            raise TypeError("Buffer element need to be list, for operator += ")
