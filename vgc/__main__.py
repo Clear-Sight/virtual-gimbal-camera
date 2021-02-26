@@ -1,12 +1,13 @@
 import cv2
-from primes import primes
-import buffer
+from . import primes
+from . import buffer
+from . import io
 
 __version__ = "0.1.0"
 
 
 def main():
-    print(primes(100))
+    print(primes.primes(100))
 
 
 
