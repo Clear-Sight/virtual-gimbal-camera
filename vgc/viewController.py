@@ -7,7 +7,24 @@ fix the view to a certaion point given longitude and latitude coordinates.
 Classes:
 ViewController
 
-TODO: Read about numba.
+INPUT from inputRegulator.py
+(There is a setter to this.)
+theta_in 
+phi_in
+lock_on (true/false)
+
+INPUT from fixHawkadapter.py
+(There is a setter to this.)
+d_roll
+d_yaw
+d_pitch
+d_height
+d_coordinate
+
+OUTPUT to cameraFilter.py
+(There is a getter to this)
+phi_final
+dist_from_center
 
 """
 import math
@@ -18,7 +35,8 @@ class ViewController():
     """
     The purpose of this class is provide with the functionality needed
     in order to adjust the camera accordingly to how the drone moves in a 
-    three-dimensional space. The camera view is meant to be set to a fixed point.
+    three-dimensional space. The camera view is meant to be set to a fixed 
+    point.
 
     Functions in the class:
     update_fixhawk_input()
@@ -30,10 +48,10 @@ class ViewController():
     adjust_aim()
     """
     
-    def __init__(self, image_radius, inputController):
+    def __init__(self, image_radius):
         # Input controller. Communicates with the auto pilot FixHawk and
         # relays data from it.
-        self.inputController = inputController
+        #self.inputController = inputController
         
         # INPUT VARIABLES FROM AUTO PILOT FIXHAWK
         # Roll, pitch and yaw are defined as the rotation around each axis 
@@ -51,11 +69,15 @@ class ViewController():
         # Theta = 0 means looking straight down, phi = 0 is looking north.
         self.theta_in = 0
         self.phi_in = 0
+        self.lock_on = False
+        self.init_lock_on = False
         
         # VARIABLES FROM CONFIG FILE
         self.IMAGE_RADIUS = 1080 # Needs to be fetched from file
 
         # INTERNAL VARIABLES
+        self.new_fixhawk_values = False
+        self.new_server_values = False
         self.aim_coordinate = (0, 0) # Saved coordinate to center focus on
         self.theta_final = 0 # Adjusted angle theta
 
@@ -64,32 +86,51 @@ class ViewController():
         # we wish to look. If, say, we want to look north and in a 45-degree
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and 
-        # dist_from_center = IMAGE_RADIUS * sin(theta_final).
+        # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
         self.phi_final = 0 
         self.dist_from_center = 0
 
-    def update_fixhawk_input(self):
+    def update_fixhawk_input(self, roll, yaw, pitch, height, lon, lat):
         """
         Updates data from the auto pilot adapter.
+        SETTER
         """
-        self.d_roll = 0 # self.inputController.get_roll()
-        self.d_pitch = 0 # self.inputController.get_pitch()
-        self.d_yaw = 0 # self.inputController.get_yaw()
-        self.d_height = 0 # self.inputController.get_height()
-        self.d_coordinate = (0, 0) # self.inputController.get_coordinates()
+        if(not self.new_fixhawk_values):
+            self.d_roll = roll # self.inputController.get_roll()
+            self.d_pitch = pitch # self.inputController.get_pitch()
+            self.d_yaw = yaw # self.inputController.get_yaw()
+            self.d_height = height # self.inputController.get_height()
+            self.d_coordinate = (lon, lat) 
+            self.new_fixhawk_values = True
+
+    def update_server_input(self, theta, phi, lock_on):
+        """
+        Updates data from user interface
+        SETTER
+        """
+        if(not self.new_server_values):
+            if(not lock_on):
+                self.theta_in = theta
+                self.phi_in = phi
+            if(lock_on == True and self.lock_on == False):
+                self.init_lock_on = True
+            self.lock_on = lock_on
+            self.new_server_values = True
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
-        Returns the rotation matrix given the roll(y-axis), yaw(z-axis) and
-        pitch(x-axis).
+        Returns the rotation matrix given the roll(y-axis), yaw(z-axis)
+        and pitch(x-axis).
 
-        A positive roll indicates a clock-wise rotation as seen from the negative
-        side of the axis. This is the case for the pitch as well. A positive yaw,
-        however, indicates a clock-wise rotation as seen from the positive side of
-        the axis. One could also say "as seen from above". This reflects the way
-        the FixHawk roll, yaw and pitch work.
-        Note that for rotation matrices the inverse and transponent are the same.
-        So, if a counter-clockwise rotation is needed, the transponent can be used.
+        A positive roll indicates a clock-wise rotation as seen from 
+        the negative side of the axis. This is the case for the pitch
+        as well. A positive yaw, however, indicates a clock-wise 
+        rotation as seen from the positive side of the axis. One could
+        also say "as seen from above". This reflects the way the
+        FixHawk roll, yaw and pitch work. Note that for rotation 
+        matrices the inverse and transponent are the same. So, if a 
+        counter-clockwise rotation is needed, the transponent can be 
+        used.
         """
         roll_rad = np.deg2rad(roll)
         roll_matrix = np.matrix([
@@ -113,8 +154,8 @@ class ViewController():
 
     def earth_radius_at_lat(self, d_lat):
         """
-        Input current latitude and return earth's approximate radius at that
-        position.
+        Input current latitude and return earth's approximate radius at
+        that position.
         """
         earth_radius_at_equator = 6378137
         radius_difference_pole_equator = 21385
@@ -125,8 +166,8 @@ class ViewController():
         """
         Translates an angular coordinate to a spherical.
 
-        The returned value is of type numpy.matrix(see documentation for further
-        information).
+        The returned value is of type numpy.matrix(see documentation
+        for further information).
         """
         theta_rad = np.deg2rad(theta)
         phi_rad = np.deg2rad(phi)
@@ -139,11 +180,13 @@ class ViewController():
 
     def spherical_to_angular(self, coord):
         """
-        Translates a given spherical coordinate to an angular coordinate.
+        Translates a given spherical coordinate to an angular 
+        coordinate.
         
         Given a spherical coordinate on the form (x,y,z) this
-        fucntion will return it in its angular form (theta, phi).
-        The input should be a numpy.matrix and the returned value is tuple.
+        function will return it in its angular form (theta, phi).
+        The input should be a numpy.matrix and the returned value is a
+        tuple.
         """
         phi = np.arctan2(coord.item(0), coord.item(1))
         theta = np.arccos(-coord.item(2))
@@ -152,34 +195,93 @@ class ViewController():
 
     def coordinate_to_point(self, coord1, coord2, z):
         """
-        Calculates where to look given two coordinates where coord1 is the origin.
+        Calculates where to look given two coordinates where coord1 is
+        the origin.
 
-        Arguments coord1 and coord2 are tuples and z is the height from where we
-        are looking, in meters. Function returns the point in its angular form,
-        (theta, phi).
+        Arguments coord1 and coord2 are tuples and z is the height from
+        where we are looking, in meters. Function returns the point in
+        its angular form(theta, phi). Used in lock-on mode.
         """
         theta = np.arctan((self.earth_radius_at_lat(coord2[1])/z) *\
-            np.sqrt(pow(np.tan(np.deg2rad(coord1[1] - coord2[1])), 2)\
-            + pow(np.tan(np.deg2rad((coord1[0] - coord2[0])/2)), 2)))
-        temp_x = np.arccos(np.deg2rad(coord1[1])) *\
-            np.sin(np.deg2rad(coord1[0] - coord2[0]))
+            np.sqrt(np.power(np.tan(np.deg2rad(coord1[1] - coord2[1])), 2)\
+            + np.power(np.tan(np.deg2rad((coord1[0] - coord2[0])/2)), 2)))
+        temp_x = np.cos(np.deg2rad(coord1[1])) *\
+            np.sin(np.deg2rad(coord2[0] - coord1[0]))
         temp_y = (np.cos(np.deg2rad(coord2[1])) * np.sin(np.deg2rad(coord1[1])))\
             - (np.sin(np.deg2rad(coord2[1])) * np.cos(np.deg2rad(coord1[1])) *\
-                np.cos(np.deg2rad(coord1[0] - coord2[0])))
+                np.cos(np.deg2rad(coord2[0] - coord1[0])))
         phi = np.arctan2(temp_x, temp_y)
         return np.rad2deg(theta), np.rad2deg(phi) % 360  #Force phi to be positive
 
 
+    def point_to_coordinate(self, theta, phi, z, d_coord):
+        """
+        Calculates the coordinate existent at the center of view.
+
+        Argument theta and phi represent our aim, z is our height from
+        sea level and d_coord is the drone's current coordinate. This
+        function is used when lock_on mode first is initialized.
+        """
+        p_lat = np.deg2rad(d_lat) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
+                np.cos(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
+        p_long = np.deg2rad(d_coord[0]) + 2 * np.arctan( (z * tan(np.deg2rad(theta))*\
+                 np.sin(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
+        return np.rad2deg(p_long), np.rad2deg(p_lat) 
+
+
     def adjust_aim(self, theta, phi):
         """
-        Adjust the camera view accordingly to how the drone operates in three dimensions.
+        Adjust the camera view accordingly to how the drone operates
+        in three dimensions.
 
-        Given two angles theta and phi that desbribes how the camera is oriented 
-        this function will compensate for the drone movement in three dimensions and
-        adjust the camera accordingly. The input should be the two angles seperated and
-        the output is a new theta and phi in a tuple.
+        Given two angles theta and phi that desbribes how the camera
+        is oriented this function will compensate for the drone 
+        movement in three dimensions and adjust the camera accordingly.
+        The input should be the two angles seperated and the output is
+        a new theta and phi in a tuple.
         """
-        inverse_rotation_matrix = self.rotation_matrix(d_roll, d_yaw, d_pitch).transpose()
+        inverse_rotation_matrix = self.rotation_matrix(self.d_roll, self.d_yaw, self.d_pitch).transpose()
         aim_spherical = self.angular_to_spherical(theta, phi)
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
+
+        
+    def main(self):
+        """
+        Main-function that runs all the time and updates our view 
+        angle. Other components simply call the setter functions and 
+        then waits for the main-function to update  where we are 
+        looking. Then you can call the getter-function to recieve 
+        the updated values.
+        """
+        while(True):
+            if(self.new_fixhawk_values or self.new_server_values):
+                self.new_fixhawk_values = True
+                self.new_server_values = True
+                if(self.lock_on):
+                    if(self.init_lock_on):
+                        self.aim_coordinate = self.point_to_coordinate(
+                            self.theta_final, self.phi_final, 
+                            self.d_height, self.d_coordinate)
+                        self.init_lock_on = False
+                    (t, p) = self.coordinate_to_point(self.d_coordinate, 
+                    self.aim_coordinate, self.d_height)
+                    self.dist_from_center = self.IMAGE_RADIUS * \
+                    np.sin(self.theta_final)
+                    self.new_fixhawk_values = False
+                    self.new_server_values = False
+                else:
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(self.theta_in, self.phi_in)
+                    self.dist_from_center = self.IMAGE_RADIUS * \
+                    np.sin(self.theta_final)
+                    self.new_server_values = False 
+                    self.new_fixhawk_values = False
+              
+
+    def get_image_point(self):
+        """
+        Returns our phi_final and dist_from_center. This can be used by
+        cameraFilter to point out where we should look. 
+        """
+        return self.phi_final, self.dist_from_center
