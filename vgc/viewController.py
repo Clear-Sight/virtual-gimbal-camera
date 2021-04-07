@@ -25,11 +25,8 @@ OUTPUT to cameraFilter.py
 (There is a getter to this)
 phi_final
 dist_from_center
-
 """
-import math
 import numpy as np
-
 
 class ViewController():
     """
@@ -40,12 +37,15 @@ class ViewController():
 
     Functions in the class:
     update_fixhawk_input()
+    update_server_input()
     rotation_matrix()
     earth_radius_at_lat()
     angular_to_spherical()
     spherical_to_angular()
     coordinate_to_point()
+    point_to_coordinate()
     adjust_aim()
+    main()
     """
     
     def __init__(self, image_radius):
@@ -159,7 +159,8 @@ class ViewController():
         """
         earth_radius_at_equator = 6378137
         radius_difference_pole_equator = 21385
-        return earth_radius_at_equator - (d_lat/90) * radius_difference_pole_equator
+        return earth_radius_at_equator - \
+        (d_lat/90) * radius_difference_pole_equator
 
 
     def angular_to_spherical(self, theta, phi):
@@ -202,16 +203,14 @@ class ViewController():
         where we are looking, in meters. Function returns the point in
         its angular form(theta, phi). Used in lock-on mode.
         """
-        theta = np.arctan((self.earth_radius_at_lat(coord2[1])/z) *\
-            np.sqrt(np.power(np.tan(np.deg2rad(coord1[1] - coord2[1])), 2)\
-            + np.power(np.tan(np.deg2rad((coord1[0] - coord2[0])/2)), 2)))
-        temp_x = np.cos(np.deg2rad(coord1[1])) *\
-            np.sin(np.deg2rad(coord2[0] - coord1[0]))
-        temp_y = (np.cos(np.deg2rad(coord2[1])) * np.sin(np.deg2rad(coord1[1])))\
-            - (np.sin(np.deg2rad(coord2[1])) * np.cos(np.deg2rad(coord1[1])) *\
-                np.cos(np.deg2rad(coord2[0] - coord1[0])))
-        phi = np.arctan2(temp_x, temp_y)
-        return np.rad2deg(theta), np.rad2deg(phi) % 360  #Force phi to be positive
+        coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])      
+        x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
+        y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
+        phi = np.arctan2(x_diff, y_diff)
+
+        theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / z)
+
+        return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360  #Force phi to be positive
 
 
     def point_to_coordinate(self, theta, phi, z, d_coord):
@@ -222,9 +221,9 @@ class ViewController():
         sea level and d_coord is the drone's current coordinate. This
         function is used when lock_on mode first is initialized.
         """
-        p_lat = np.deg2rad(d_lat) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
+        p_lat = np.deg2rad(d_coord[1]) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
                 np.cos(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
-        p_long = np.deg2rad(d_coord[0]) + 2 * np.arctan( (z * tan(np.deg2rad(theta))*\
+        p_long = np.deg2rad(d_coord[0]) + 2 * np.arctan( (z * np.tan(np.deg2rad(theta))*\
                  np.sin(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
         return np.rad2deg(p_long), np.rad2deg(p_lat) 
 
@@ -254,29 +253,34 @@ class ViewController():
         looking. Then you can call the getter-function to recieve 
         the updated values.
         """
-        while(True):
-            if(self.new_fixhawk_values or self.new_server_values):
-                self.new_fixhawk_values = True
-                self.new_server_values = True
-                if(self.lock_on):
-                    if(self.init_lock_on):
-                        self.aim_coordinate = self.point_to_coordinate(
-                            self.theta_final, self.phi_final, 
-                            self.d_height, self.d_coordinate)
-                        self.init_lock_on = False
-                    (t, p) = self.coordinate_to_point(self.d_coordinate, 
-                    self.aim_coordinate, self.d_height)
-                    self.dist_from_center = self.IMAGE_RADIUS * \
-                    np.sin(self.theta_final)
-                    self.new_fixhawk_values = False
-                    self.new_server_values = False
-                else:
-                    self.theta_final, self.phi_final = \
-                    self.adjust_aim(self.theta_in, self.phi_in)
-                    self.dist_from_center = self.IMAGE_RADIUS * \
-                    np.sin(self.theta_final)
-                    self.new_server_values = False 
-                    self.new_fixhawk_values = False
+
+        if(self.new_fixhawk_values or self.new_server_values):
+            self.new_fixhawk_values = True
+            self.new_server_values = True
+            if(self.lock_on):
+                if(self.init_lock_on):
+                    self.aim_coordinate = self.point_to_coordinate(
+                        self.theta_in, self.phi_in, 
+                        self.d_height, self.d_coordinate)
+                    self.init_lock_on = False
+                (t, p) = self.coordinate_to_point(self.d_coordinate, 
+                self.aim_coordinate, self.d_height)
+                
+                self.theta_final, self.phi_final = \
+                self.adjust_aim(t, p)
+
+                self.dist_from_center = self.IMAGE_RADIUS * \
+                np.sin(self.theta_final)
+                
+                self.new_fixhawk_values = False
+                self.new_server_values = False
+            else:
+                self.theta_final, self.phi_final = \
+                self.adjust_aim(self.theta_in, self.phi_in)
+                self.dist_from_center = self.IMAGE_RADIUS * \
+                np.sin(self.theta_final)
+                self.new_server_values = False 
+                self.new_fixhawk_values = False
               
 
     def get_image_point(self):
