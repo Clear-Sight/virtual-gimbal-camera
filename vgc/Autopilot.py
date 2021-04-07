@@ -9,9 +9,6 @@ def connecting_with_autopilot():
     print ("Connecting...")
     connection_string = "/dev/ttyAMA0"
     baud_t = 57600
-    """vehicle = connect(connection_string,
-                 wait_ready=False ,
-                baud = baud_t)"""
     vehicle = mavutil.mavlink_connection(connection_string,baud_t)   
     return vehicle
 
