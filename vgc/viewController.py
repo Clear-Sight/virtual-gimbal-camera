@@ -103,7 +103,7 @@ class ViewController():
             self.d_coordinate = (lon, lat) 
             self.new_fixhawk_values = True
 
-    def update_server_input(self, theta, phi, lock_on):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False):
         """
         Updates data from user interface
         SETTER
@@ -222,9 +222,9 @@ class ViewController():
         function is used when lock_on mode first is initialized.
         """
         p_lat = np.deg2rad(d_coord[1]) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
-                np.cos(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
-        p_long = np.deg2rad(d_coord[0]) + 2 * np.arctan( (z * np.tan(np.deg2rad(theta))*\
-                 np.sin(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
+                np.sin(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
+        p_long = np.deg2rad(d_coord[0]) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
+                 np.cos(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
         return np.rad2deg(p_long), np.rad2deg(p_lat) 
 
 
@@ -262,10 +262,11 @@ class ViewController():
                     self.aim_coordinate = self.point_to_coordinate(
                         self.theta_in, self.phi_in, 
                         self.d_height, self.d_coordinate)
+                    print(self.aim_coordinate)
                     self.init_lock_on = False
                 (t, p) = self.coordinate_to_point(self.d_coordinate, 
                 self.aim_coordinate, self.d_height)
-                
+                print((t, p))
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(t, p)
 
