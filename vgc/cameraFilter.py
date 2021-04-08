@@ -4,6 +4,7 @@ import threading
 import cv2
 
 from .filter import Filter
+from .io import outputAdapter
 
 
 class CameraFilter(Filter):
@@ -14,7 +15,7 @@ class CameraFilter(Filter):
         variables are updated asynchronously through the update funciton.
     """
 
-    def __init__(self, arg):
+    def __init__(self):
         """Initializes the Camerafilter.
 
         Sets some default starting values
@@ -31,6 +32,7 @@ class CameraFilter(Filter):
         self.sem = threading.Semaphore()
         self.thread = threading.Thread(target=self.start)
         self.thread.start()
+        self.output_adapter = outputAdapter.outputAdapter()
 
     def __del__(self):
         """Deletes the thread if the CameraFilter is deleted."""
@@ -55,7 +57,7 @@ class CameraFilter(Filter):
         Crops and rotates according to jaw_in, pitch_in and zoom_in.
         Outputs the proccesed videostream.
         """
-        cap = cv2.VideoCapture('vgc/footage.mp4')
+        cap = cv2.VideoCapture(0)
 
         cnt = 0  # Initialize frame counter
 
@@ -92,8 +94,12 @@ class CameraFilter(Filter):
                                                                 + self.pitch_in))
                 # Resize the frame
                 final_frame = cv2.resize(crop_frame, (width,height))
-
-                out.write(final_frame)
+                try:
+                    self.output_adapter.send(final_frame)
+                    cv2.waitKey(1)
+                except KeyboardInterrupt:
+                    cv2.destroyAllWindows()
+                    out.write(final_frame)
 
                 self.sem.release()
 
