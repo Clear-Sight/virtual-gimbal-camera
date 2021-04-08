@@ -72,8 +72,8 @@ class CameraFilter(Filter):
         height = 480
 
         # The output, subject to change
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('result.avi', fourcc, fps, (width, height))
+#        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+ #       out = cv2.VideoWriter('result.avi', fourcc, fps, (width, height))
 
         while(cap.isOpened() and not self.stopped):
             ret, frame = cap.read()  # Capture frame by frames
@@ -105,5 +105,5 @@ class CameraFilter(Filter):
 
         cap.release()
 
-        out.release()
+#        out.release()
         cv2.destroyAllWindows()

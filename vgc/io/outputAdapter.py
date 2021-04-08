@@ -8,7 +8,7 @@ class outputAdapter(Adapter):
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect('tcp://localhost:7777')
+        self.socket.connect('tcp://178.174.148.6:7777')
 
     def format():
         pass

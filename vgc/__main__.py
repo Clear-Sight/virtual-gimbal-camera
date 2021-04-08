@@ -1,5 +1,5 @@
 import cv2
-from . import primes
+#from . import primes
 from . import buffer
 from . import io
 from . import cameraFilter
