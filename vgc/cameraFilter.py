@@ -5,6 +5,7 @@ import cv2
 
 from .filter import Filter
 from .io import outputAdapter
+from . import config
 
 
 class CameraFilter(Filter):
@@ -57,7 +58,7 @@ class CameraFilter(Filter):
         Crops and rotates according to jaw_in, pitch_in and zoom_in.
         Outputs the proccesed videostream.
         """
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(config.CONFIG['cam_input'])
 
         cnt = 0  # Initialize frame counter
 
@@ -67,8 +68,8 @@ class CameraFilter(Filter):
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         # Croping values
-        width = 640
-        height = 480
+        width = config.CONFIG['cam_width']
+        height = config.CONFIG['cam_height']
 
 
         while(cap.isOpened() and not self.stopped):
