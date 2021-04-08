@@ -29,7 +29,8 @@ dist_from_center
 import numpy as np
 from viewController_utils import *
 
-# pylint: disable
+# pylint: disable=import-error
+# It can find it.
 
 class ViewController():
 
