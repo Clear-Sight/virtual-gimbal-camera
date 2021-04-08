@@ -1,10 +1,15 @@
 appdirs==1.4.4
 astroid==2.5.1
 attrs==20.3.0
+<<<<<<< HEAD
 black==20.8b1
 click==7.1.2
 Cython==0.29.21
 flake8==3.8.4
+=======
+click==7.1.2
+Cython==0.29.21
+>>>>>>> development
 iniconfig==1.1.1
 isort==5.7.0
 lazy-object-proxy==1.5.2
@@ -21,10 +26,16 @@ pyflakes==2.2.0
 pylint==2.7.2
 pyparsing==2.4.7
 pytest==6.2.2
+<<<<<<< HEAD
 pyzmq==22.0.3
+=======
+>>>>>>> development
 regex==2020.11.13
 toml==0.10.2
 typed-ast==1.4.2
 typing-extensions==3.7.4.3
 wrapt==1.12.1
+<<<<<<< HEAD
 zmq==0.0.0
+=======
+>>>>>>> development

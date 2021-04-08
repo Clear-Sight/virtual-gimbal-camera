@@ -1,16 +1,16 @@
-# drone-feed-cropping
+# Virtual gimbal-camera
 
 This is a  project to be able to crop, zoom and stabilize a feed from a 180+ degree camera.
 
 
 ## install
 
-Do the following commands 
+Do the following commands
 
 Linux, macOS
 ```bash
-git clone git@github.com:Clear-Sight/drone-feed-cropping.git
-cd drone-feed-cropping/
+git clone git@github.com:Clear-Sight/virtual-gimbal-camera.git
+cd virtual-gimbal-camera/
 ```
 and then
 ```bash
@@ -27,7 +27,7 @@ Linux, macOS
 sh run.sh
 ```
 
-
+## testing 
 
 ## Contributing
 See [contributing.md](https://github.com/Clear-Sight/drone-feed-cropping/blob/development/.github/contributing.md)
