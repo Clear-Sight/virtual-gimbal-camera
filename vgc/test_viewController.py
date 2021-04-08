@@ -63,7 +63,7 @@ def test_main():
     #Test so that theta can not be set to an invalid value.
     for test_theta in [20, 30, -10, 110]:
         assert testing_inappropriate_theta(test_theta)
-        
+
     print("Passed all tests")
 
 # Return 0 if x is negative, 180 if positive
@@ -101,7 +101,7 @@ def get_camera_angle_when_roll(roll):
 
 def testing_inappropriate_theta(theta):
     """
-    This function tests that different 
+    This function tests that different
     thetas and checks if they are set correctly.
     """
     vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
@@ -123,7 +123,7 @@ def get_target_coordinate(coord):
     """
     This function inputs a coordinat, locks on it, and then
     tries to move to another point. This should not be possible
-    since we looked on a specific coordinat. 
+    since we looked on a specific coordinat.
     """
     vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
