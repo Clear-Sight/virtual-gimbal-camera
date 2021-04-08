@@ -29,6 +29,8 @@ dist_from_center
 import numpy as np
 from viewController_utils import *
 
+# pylint: disable
+
 class ViewController():
 
     # pylint: disable=too-many-instance-attributes
@@ -43,10 +45,6 @@ class ViewController():
     Functions in the class:
     update_fixhawk_input()
     update_server_input()
-    rotation_matrix()
-    earth_radius_at_lat()
-    angular_to_spherical()
-    spherical_to_angular()
     coordinate_to_point()
     point_to_coordinate()
     adjust_aim()
@@ -99,7 +97,7 @@ class ViewController():
     def update_fixhawk_input(self, roll, yaw, pitch, height, lon, lat):
 
         # pylint: disable=too-many-arguments
-        # 7 arguments is needed for this function. 
+        # 7 arguments is needed for this function.
 
         """
         Updates data from the auto pilot adapter.
@@ -145,8 +143,8 @@ class ViewController():
         point in its angular form(theta, phi). Used in lock-on mode.
         """
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
-        x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
-        y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
+        x_diff = np.tan(np.deg2rad(coord_diff[1])) * earth_radius_at_lat(coord1[1])
+        y_diff = np.tan(np.deg2rad(coord_diff[0])) * earth_radius_at_lat(coord1[1])
         phi = np.arctan2(x_diff, y_diff)
         theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / height)
         return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360
@@ -162,10 +160,10 @@ class ViewController():
         """
         p_lat = np.deg2rad(d_coord[1]) +\
             np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.sin(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+            np.sin(np.deg2rad(phi))) / earth_radius_at_lat(d_coord[1]))
         p_long = np.deg2rad(d_coord[0]) +\
             np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.cos(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+            np.cos(np.deg2rad(phi))) / earth_radius_at_lat(d_coord[1]))
         return np.rad2deg(p_long), np.rad2deg(p_lat)
 
     def adjust_aim(self, theta, phi):
@@ -179,11 +177,11 @@ class ViewController():
         The input should be the two angles seperated and the output is
         a new theta and phi in a tuple.
         """
-        inverse_rotation_matrix = self.rotation_matrix(self.d_roll,
+        inverse_rotation_matrix = rotation_matrix(self.d_roll,
         self.d_yaw, self.d_pitch).transpose()
-        aim_spherical = self.angular_to_spherical(theta, phi)
+        aim_spherical = angular_to_spherical(theta, phi)
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
-        return self.spherical_to_angular(aim_spherical_adjusted)
+        return spherical_to_angular(aim_spherical_adjusted)
 
     def main(self):
         """
@@ -219,7 +217,7 @@ class ViewController():
                 self.new_server_values = False
                 self.new_fixhawk_values = False
 
-    def get_image_point():
+    def get_image_point(self):
         """
         Returns our phi_final and dist_from_center. This can be used by
         cameraFilter to point out where we should look.
