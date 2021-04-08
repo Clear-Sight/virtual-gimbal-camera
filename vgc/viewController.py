@@ -34,6 +34,9 @@ import numpy as np
 # pylint: disable=too-many-instance-attributes
 # 16 is needed for the ViewController class.
 
+# pylint: disable=invalid-name
+# ViewController is a valid fucking name, fuck off
+
 class ViewController():
 
     """
