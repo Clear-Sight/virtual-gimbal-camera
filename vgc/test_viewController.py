@@ -11,6 +11,10 @@ import mpl_toolkits.mplot3d.art3d as art3d
 SIZE = 200
 VIEW_SIZE = 50
 
+# pylint: disable=invalid-name
+# This is a test file, it uses tons of short variables used only
+# for visualization. Having understandable names for these is
+# unnecessary.
 
 def test_main():
     """
@@ -26,12 +30,12 @@ def test_main():
 
     # Test getting the right target coordiante even if we move
     for test_coord in [(10, 13), (0, 0), (-13, -37)]:
-        assert np.allclose(get_target_coordinate(test_coord), 
+        assert np.allclose(get_target_coordinate(test_coord),
         test_coord, margin, margin)
 
     # Test if theta is correct when we yaw
     for testyaw in [45, -45, 360, 1066]:
-        assert np.allclose(get_camera_angle_when_yaw(testyaw)[0], 
+        assert np.allclose(get_camera_angle_when_yaw(testyaw)[0],
     45, margin)
 
     # Test if theta is right when we roll
@@ -41,7 +45,7 @@ def test_main():
 
     # Test if theta and phi is right when we pitch
     for testpitch in [-42, 69, 0.1]:
-        assert np.allclose(get_camera_angle_when_pitch(testpitch), 
+        assert np.allclose(get_camera_angle_when_pitch(testpitch),
         (np.abs(testpitch), unitstep(testpitch)), margin, margin)
 
     # Test if height doesn't change when entering an invalid value
@@ -75,7 +79,7 @@ def testing_inappropriate_theta(theta):
     vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
     vc.main()
-    return (vc.theta_in < 90 and vc.theta_in >= 0)
+    return vc.theta_in < 90 and vc.theta_in >= 0
 
 def testing_inappropriate_height(height):
     vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
@@ -94,7 +98,7 @@ def get_target_coordinate(coord):
 def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     d_long = 15
     d_lat = 15
-    if(lock_on):
+    if lock_on:
         vc.update_server_input(theta, phi, False)
         vc.main()
     vc.update_fixhawk_input(roll, yaw, pitch, height, d_long, d_lat)
@@ -102,8 +106,9 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     vc.main()
 
     #Target coordinate as a point
-    if(lock_on):
-        coord_diff = (vc.aim_coordinate[0] - d_long, vc.aim_coordinate[1] - d_lat)
+    if lock_on:
+        coord_diff = (vc.aim_coordinate[0] - d_long,
+        vc.aim_coordinate[1] - d_lat)
     else:
         coord_diff = (p_long - d_long, p_lat - d_lat)
 
@@ -117,7 +122,8 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
 
     # Figur
     fig = plt.figure()
-    ax = fig.gca(projection='3d', xlim=(-1*SIZE,SIZE), ylim=(-1*SIZE,SIZE), zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
+    ax = fig.gca(projection='3d', xlim=(-1 * SIZE, SIZE), ylim=(-1 * SIZE, SIZE),
+    zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
     ax.set_ylabel('Drönarens riktning (y)')
     ax.set_xlabel('Drönarens sidor (x)')
 
@@ -136,28 +142,34 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     p = np.array([point.item(0), point.item(1), point.item(2)])
     n = np.array([normal.item(0), normal.item(1), normal.item(2)])
     d = -p.dot(n)
-    xx, yy = np.meshgrid(range(-SIZE,SIZE+100,100), range(-SIZE,SIZE+100,100), sparse = True)
+    xx, yy = np.meshgrid(range(-SIZE,SIZE+100,100), range(-SIZE,SIZE+100,100),
+    sparse = True)
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
     ax.plot_surface(xx, yy, z, alpha = 0.5)
 
     # plotta sökt koordinat
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
-    ax.scatter(p_3dcoordinate.item(0), p_3dcoordinate.item(1), p_3dcoordinate.item(2), marker = '^')
+    ax.scatter(p_3dcoordinate.item(0), p_3dcoordinate.item(1),
+    p_3dcoordinate.item(2), marker = '^')
 
     # plotta drönarens riktning
     drone_dir = vc.angular_to_spherical(90, 0)
 
-    ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1), drone_dir.item(2)*VIEW_SIZE, marker = '^')
+    ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1),
+    drone_dir.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
     #Norr
     north = rot_matrix_inv.dot(drone_dir)
-    ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1), VIEW_SIZE * north.item(2), marker='o')
+    ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
+    VIEW_SIZE * north.item(2), marker='o')
 
     ### Kamerans sikte
     theta_final, phi_final = vc.theta_final, vc.phi_final
 
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
-    ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0), VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2), marker = 'x')
+    ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0),
+    VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
+    marker = 'x')
     plt.show()
     
