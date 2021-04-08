@@ -31,9 +31,9 @@ import numpy as np
 class ViewController():
     """
     The purpose of this class is provide with the functionality needed
-    in order to adjust the camera accordingly to how the drone moves in a
-    three-dimensional space. The camera view is meant to be set to a fixed
-    point.
+    in order to adjust the camera accordingly to how the drone moves in
+    a three-dimensional space. The camera view is meant to be set to a
+    fixed point.
 
     Functions in the class:
     update_fixhawk_input()
@@ -49,14 +49,16 @@ class ViewController():
     """
 
     def __init__(self):
-        # Input controller. Communicates with the auto pilot FixHawk and
-        # relays data from it.
+        """
+        Input controller. Communicates with the auto pilot FixHawk and
+        relays data from it.
 
-        # INPUT VARIABLES FROM AUTO PILOT FIXHAWK
-        # Roll, pitch and yaw are defined as the rotation around each axis 
-        # with positive angle signifying a clockwise rotation. Roll is defined
-        # as rotation around the y-axis, pitch around the x-axis and yaw
-        # around the z-axis.
+        INPUT VARIABLES FROM AUTO PILOT FIXHAWK
+        Roll, pitch and yaw are defined as the rotation around each axis
+        with positive angle signifying a clockwise rotation. Roll is defined
+        as rotation around the y-axis, pitch around the x-axis and yaw
+        around the z-axis.
+        """
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -86,7 +88,7 @@ class ViewController():
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
-        self.phi_final = 0 
+        self.phi_final = 0
         self.dist_from_center = 0
 
     def update_fixhawk_input(self, roll, yaw, pitch, height, lon, lat):
@@ -186,7 +188,7 @@ class ViewController():
 
     def spherical_to_angular(self, coord):
         """
-        Translates a given spherical coordinate to an angular 
+        Translates a given spherical coordinate to an angular
         coordinate.
 
         Given a spherical coordinate on the form (x,y,z) this
@@ -207,20 +209,20 @@ class ViewController():
         where we are looking, in meters. Function returns the point in
         its angular form(theta, phi). Used in lock-on mode.
         """
-        coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])      
+        coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
         x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
         y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
         phi = np.arctan2(x_diff, y_diff)
         theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / z)
-        return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360  #Force phi to be positive
+        return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360
 
     def point_to_coordinate(self, theta, phi, height, d_coord):
         """
         Calculates the coordinate existent at the center of view.
 
-        Argument theta and phi represent our aim, height is our 
-        height from sea level and d_coord is the drone's current 
-        coordinate. Thisfunction is used when lock_on mode first is 
+        Argument theta and phi represent our aim, height is our
+        height from sea level and d_coord is the drone's current
+        coordinate. Thisfunction is used when lock_on mode first is
         initialized.
         """
         p_lat = np.deg2rad(d_coord[1]) +\
@@ -229,7 +231,7 @@ class ViewController():
         p_long = np.deg2rad(d_coord[0]) +\
             np.arctan((height * np.tan(np.deg2rad(theta))*\
             np.cos(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
-        return np.rad2deg(p_long), np.rad2deg(p_lat) 
+        return np.rad2deg(p_long), np.rad2deg(p_lat)
 
     def adjust_aim(self, theta, phi):
         """
@@ -237,7 +239,7 @@ class ViewController():
         in three dimensions.
 
         Given two angles theta and phi that desbribes how the camera
-        is oriented this function will compensate for the drone 
+        is oriented this function will compensate for the drone
         movement in three dimensions and adjust the camera accordingly.
         The input should be the two angles seperated and the output is
         a new theta and phi in a tuple.
@@ -250,10 +252,10 @@ class ViewController():
 
     def main(self):
         """
-        Main-function that runs all the time and updates our view 
-        angle. Other components simply call the setter functions and 
-        then waits for the main-function to update  where we are 
-        looking. Then you can call the getter-function to recieve 
+        Main-function that runs all the time and updates our view
+        angle. Other components simply call the setter functions and
+        then waits for the main-function to update  where we are
+        looking. Then you can call the getter-function to recieve
         the updated values.
         """
         if self.new_fixhawk_values or self.new_server_values:
@@ -262,15 +264,16 @@ class ViewController():
             if self.lock_on:
                 if self.init_lock_on:
                     self.aim_coordinate = self.point_to_coordinate(
-                        self.theta_in, self.phi_in, 
+                        self.theta_in, self.phi_in,
                         self.d_height, self.d_coordinate)
                     self.init_lock_on = False
+
                 (theta_temp, phi_temp) = self.coordinate_to_point(
                     self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(theta_temp, phi_temp)
                 self.dist_from_center = self.image_radius * \
-                np.sin(self.theta_final)    
+                np.sin(self.theta_final)
                 self.new_fixhawk_values = False
                 self.new_server_values = False
             else:
@@ -278,12 +281,12 @@ class ViewController():
                 self.adjust_aim(self.theta_in, self.phi_in)
                 self.dist_from_center = self.image_radius * \
                 np.sin(self.theta_final)
-                self.new_server_values = False 
+                self.new_server_values = False
                 self.new_fixhawk_values = False
-              
+
     def get_image_point(self):
         """
         Returns our phi_final and dist_from_center. This can be used by
-        cameraFilter to point out where we should look. 
+        cameraFilter to point out where we should look.
         """
         return self.phi_final, self.dist_from_center
