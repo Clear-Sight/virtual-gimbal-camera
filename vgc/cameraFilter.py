@@ -65,9 +65,8 @@ class CameraFilter(Filter):
         # Some characteristics from the original video
         w_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h_frame = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
 
-        # Croping values
+        # Getting width and height of output from config file
         width = config.CONFIG['cam_width']
         height = config.CONFIG['cam_height']
 
@@ -80,18 +79,21 @@ class CameraFilter(Filter):
             if ret:
                 self.sem.acquire()
                 # Get rotation matrix
-                matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2), self.jaw_in, 1)
+                matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
+                                                  self.jaw_in, 1)
                 # Aply rotation matrix
-                rotated_frame = cv2.warpAffine(frame, matrix, (w_frame, h_frame))
+                rotated_frame = cv2.warpAffine(frame, matrix,
+                                               (w_frame, h_frame))
                 # Crop the frame
-                crop_frame = cv2.getRectSubPix(rotated_frame, (int(width*self.zoom_in),
-                                                                int(height*self.zoom_in)),
-                                                                (w_frame/2, h_frame/2
-                                                                - height*self.zoom_in/2
-                                                                + self.pitch_in))
+                crop_frame = cv2.getRectSubPix(rotated_frame,
+                                                (int(width*self.zoom_in),
+                                                 int(height*self.zoom_in)),
+                                                (w_frame/2, h_frame/2
+                                                 - height*self.zoom_in/2
+                                                 + self.pitch_in))
                 # Resize the frame
                 final_frame = cv2.resize(crop_frame, (width,height))
-                
+
                 try:
                     self.output_adapter.send(final_frame)
                     cv2.waitKey(1)
