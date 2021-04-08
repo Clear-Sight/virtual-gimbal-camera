@@ -1,12 +1,13 @@
-import viewController as viewController
-from mpl_toolkits import mplot3d
-#%matplotlib inline
+"""
+This module is used to test the functionality in
+viewController.py. The main function is test_main()
+which executes all the different testfunctions.
+"""
+import viewController
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-vc = viewController.ViewController(1080)
-from matplotlib.patches import Rectangle, PathPatch
-import mpl_toolkits.mplot3d.art3d as art3d
+
+vc = viewController.ViewController()
 
 SIZE = 200
 VIEW_SIZE = 50
@@ -15,6 +16,14 @@ VIEW_SIZE = 50
 # This is a test file, it uses tons of short variables used only
 # for visualization. Having understandable names for these is
 # unnecessary.
+
+# pylint: disable=import-error
+# Works when executed. Dynamic compiler is stuffed.
+
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
+# Rather too many local variables than using magic numbers.
+# Also, 9 arguments for function "plot" is necessary.
 
 def test_main():
     """
@@ -52,30 +61,50 @@ def test_main():
     for test_height in [-10, 10, 9999, 1000]:
         assert testing_inappropriate_height(test_height)
 
+    #Test so that theta can not be set to an invalid value.
+    for test_theta in [20, 30, -10, 110]:
+        assert testing_inappropriate_theta(test_theta)
+
     print("Passed all tests")
 
 # Return 0 if x is negative, 180 if positive
 unitstep = lambda x : 0 if x <= 0 else 180
 
 def get_camera_angle_when_pitch(pitch):
+    """
+    This function tests if the camera angle
+    behaves accordingly if the drone pitches.
+    """
     vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
 
 def get_camera_angle_when_yaw(yaw):
+    """
+    This function tests if the camera angle
+    behaves accordingly if the drone yaws.
+    """
     vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
 
 def get_camera_angle_when_roll(roll):
+    """
+    This function tests if the camera angle
+    behaves accordingly if the drone rolls.
+    """
     vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return (vc.theta_final, vc.phi_final)
 
 def testing_inappropriate_theta(theta):
+    """
+    This function tests that if we a 
+    inappropriate we should 
+    """
     vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
     vc.main()
@@ -127,14 +156,14 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     ax.set_ylabel('Drönarens riktning (y)')
     ax.set_xlabel('Drönarens sidor (x)')
 
-    ### Sfär
-    u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:20j]
+    # Plotta kamerans sfär
+    u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
     x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
     y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
-    z = (VIEW_SIZE)*np.cos(v)
+    z = -(VIEW_SIZE)*np.cos(v)
     ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
 
-    # Marken
+    # Plotta marken
     point = np.array([[0], [0], [-height]])
     point = rot_matrix_inv.dot(point)
     normal = np.array([[0], [0], [1]])
@@ -147,7 +176,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
     ax.plot_surface(xx, yy, z, alpha = 0.5)
 
-    # plotta sökt koordinat
+    # Plotta sökt koordinat
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
     ax.scatter(p_3dcoordinate.item(0), p_3dcoordinate.item(1),
     p_3dcoordinate.item(2), marker = '^')
@@ -159,14 +188,13 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     drone_dir.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
-    #Norr
+    # Norr
     north = rot_matrix_inv.dot(drone_dir)
     ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
     VIEW_SIZE * north.item(2), marker='o')
 
-    ### Kamerans sikte
+    # Kamerans sikte
     theta_final, phi_final = vc.theta_final, vc.phi_final
-
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
     ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0),
     VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
