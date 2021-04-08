@@ -10,9 +10,6 @@ class outputAdapter(Adapter):
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect('tcp://178.174.148.6:7777')
 
-    def format():
-        pass
-
     def send(self, frame):
         # ret, frame = self.camera.read()
         # BUG: not needed, done in the filter
