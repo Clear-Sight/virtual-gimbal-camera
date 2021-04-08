@@ -28,10 +28,13 @@ dist_from_center
 """
 import numpy as np
 
-class ViewController():
+# pylint: disable=no-self-use
+# There is no better place for these functions
 
-    # pylint: disable=too-many-instance-attributes
-    # 16 is needed for the ViewController class.
+# pylint: disable=too-many-instance-attributes
+# 16 is needed for the ViewController class.
+
+class ViewController():
 
     """
     The purpose of this class is provide with the functionality needed
