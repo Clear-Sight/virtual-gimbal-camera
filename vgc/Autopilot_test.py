@@ -1,20 +1,26 @@
-from Autopilot import connecting_with_autopilot
-from Autopilot import get_alt
-from Autopilot import get_attitude_massage
-from Autopilot import get_roll
-from Autopilot import get_pitch
-from Autopilot import get_yaw
-import time
 from Autopilot import *
 
+def is_yaw_pitch_roll_float(vehicle):
+    """Float control for the roll,pitch and yaw"""
+    roll  = get_roll(vehicle)
+    pitch = get_pitch(vehicle)
+    yaw   = get_yaw(vehicle)
+    return isinstance(roll, float) and isinstance(pitch, float) and isinstance(yaw, float)
 
-vechial = connecting_with_autopilot()
-massage_atttitude = get_attitude_massage(vechial)
-print(get_roll(massage_atttitude))
-print(get_pitch(massage_atttitude))
-print(get_yaw(massage_atttitude))
+def is_GPS_float(vehicle):
+    """Float control for GPS data"""
+    lat  = get_lat(vehicle)
+    lon = get_lon(vehicle)
+    alt   = get_alt(vehicle)
+    return isinstance(lat, float) and isinstance(lon, float) and isinstance(alt, float)
 
-print(vechial.location())
+
+def autopilot_adapter_test():
+    """test all test functions"""
+    vehicle = connecting_with_autopilot()
+    assert is_yaw_pitch_roll_float and is_GPS_float(vehicle)
+
+
 
 
 
