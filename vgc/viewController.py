@@ -27,10 +27,6 @@ phi_final
 dist_from_center
 """
 import numpy as np
-from viewController_utils import *
-
-# pylint: disable=import-error
-# It can find it.
 
 class ViewController():
 
@@ -144,8 +140,8 @@ class ViewController():
         point in its angular form(theta, phi). Used in lock-on mode.
         """
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
-        x_diff = np.tan(np.deg2rad(coord_diff[1])) * earth_radius_at_lat(coord1[1])
-        y_diff = np.tan(np.deg2rad(coord_diff[0])) * earth_radius_at_lat(coord1[1])
+        x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
+        y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
         phi = np.arctan2(x_diff, y_diff)
         theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / height)
         return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360
@@ -161,10 +157,10 @@ class ViewController():
         """
         p_lat = np.deg2rad(d_coord[1]) +\
             np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.sin(np.deg2rad(phi))) / earth_radius_at_lat(d_coord[1]))
+            np.sin(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
         p_long = np.deg2rad(d_coord[0]) +\
             np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.cos(np.deg2rad(phi))) / earth_radius_at_lat(d_coord[1]))
+            np.cos(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
         return np.rad2deg(p_long), np.rad2deg(p_lat)
 
     def adjust_aim(self, theta, phi):
@@ -178,11 +174,11 @@ class ViewController():
         The input should be the two angles seperated and the output is
         a new theta and phi in a tuple.
         """
-        inverse_rotation_matrix = rotation_matrix(self.d_roll,
+        inverse_rotation_matrix = self.rotation_matrix(self.d_roll,
         self.d_yaw, self.d_pitch).transpose()
-        aim_spherical = angular_to_spherical(theta, phi)
+        aim_spherical = self.angular_to_spherical(theta, phi)
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
-        return spherical_to_angular(aim_spherical_adjusted)
+        return self.spherical_to_angular(aim_spherical_adjusted)
 
     def main(self):
         """
@@ -224,3 +220,76 @@ class ViewController():
         cameraFilter to point out where we should look.
         """
         return self.phi_final, self.dist_from_center
+
+    def rotation_matrix(self, roll, yaw, pitch):
+        """
+        Returns the rotation matrix given the roll(y-axis), yaw(z-axis)
+        and pitch(x-axis).
+
+        A positive roll indicates a clock-wise rotation as seen from
+        the negative side of the axis. This is the case for the pitch
+        as well. A positive yaw, however, indicates a clock-wise
+        rotation as seen from the positive side of the axis. One could
+        also say "as seen from above". This reflects the way the
+        FixHawk roll, yaw and pitch work. Note that for rotation
+        matrices the inverse and transponent are the same. So, if a
+        counter-clockwise rotation is needed, the transponent can be
+        used.
+        """
+        roll_rad = np.deg2rad(roll)
+        roll_matrix = np.matrix([
+                                [np.cos(roll_rad), 0, np.sin(roll_rad)],
+                                [0, 1, 0],
+                                [-np.sin(roll_rad), 0, np.cos(roll_rad)]
+                                ])
+        yaw_rad = np.deg2rad(yaw)
+        yaw_matrix = np.matrix([
+                                [np.cos(yaw_rad), np.sin(yaw_rad), 0],
+                                [-np.sin(yaw_rad), np.cos(yaw_rad), 0],
+                                [0, 0, 1]])
+        pitch_rad = np.deg2rad(pitch)
+        pitch_matrix = np.matrix([
+                                [1, 0, 0],
+                                [0, np.cos(pitch_rad), -np.sin(pitch_rad)],
+                                [0, np.sin(pitch_rad), np.cos(pitch_rad)]
+                                ])
+        return roll_matrix.dot(yaw_matrix.dot(pitch_matrix))
+
+    def earth_radius_at_lat(self, lat):
+        """
+        Input current latitude and return earth's approximate radius at
+        that position.
+        """
+        earth_radius_at_equator = 6378137
+        radius_difference_pole_equator = 21385
+        return earth_radius_at_equator - \
+        (lat/90) * radius_difference_pole_equator
+
+    def angular_to_spherical(self, theta, phi):
+        """
+        Translates an angular coordinate to a spherical.
+
+        The returned value is of type numpy.matrix(see documentation
+        for further information).
+        """
+        theta_rad = np.deg2rad(theta)
+        phi_rad = np.deg2rad(phi)
+        return np.matrix([
+                        [np.sin(theta_rad) * np.sin(phi_rad)],
+                        [np.sin(theta_rad)*np.cos(phi_rad)],
+                        [-np.cos(theta_rad)]
+                        ])
+
+    def spherical_to_angular(self, coord):
+        """
+        Translates a given spherical coordinate to an angular
+        coordinate.
+
+        Given a spherical coordinate on the form (x,y,z) this
+        function will return it in its angular form (theta, phi).
+        The input should be a numpy.matrix and the returned value is a
+        tuple.
+        """
+        phi = np.arctan2(coord.item(0), coord.item(1))
+        theta = np.arccos(-coord.item(2))
+        return np.rad2deg(theta), np.rad2deg(phi) % 360
