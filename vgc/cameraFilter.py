@@ -65,15 +65,11 @@ class CameraFilter(Filter):
         w_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h_frame = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        #frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
         # Croping values
         width = 640
         height = 480
 
-        # The output, subject to change
-#        fourcc = cv2.VideoWriter_fourcc(*'XVID')
- #       out = cv2.VideoWriter('result.avi', fourcc, fps, (width, height))
 
         while(cap.isOpened() and not self.stopped):
             ret, frame = cap.read()  # Capture frame by frames
@@ -94,16 +90,15 @@ class CameraFilter(Filter):
                                                                 + self.pitch_in))
                 # Resize the frame
                 final_frame = cv2.resize(crop_frame, (width,height))
+                
                 try:
                     self.output_adapter.send(final_frame)
                     cv2.waitKey(1)
                 except KeyboardInterrupt:
-                    cv2.destroyAllWindows()
-                    out.write(final_frame)
+                    self.stopped = True
 
                 self.sem.release()
 
         cap.release()
 
-#        out.release()
         cv2.destroyAllWindows()
