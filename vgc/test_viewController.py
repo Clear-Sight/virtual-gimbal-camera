@@ -113,7 +113,7 @@ def testing_inappropriate_height(height):
     """
     This function tests different heights
     and checks if they are set correctly.
-    """"
+    """
     vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
