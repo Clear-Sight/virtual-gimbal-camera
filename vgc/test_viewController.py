@@ -3,15 +3,6 @@ This module is used to test the functionality in
 viewController.py. The main function is test_main()
 which executes all the different testfunctions.
 """
-import viewController
-import numpy as np
-import matplotlib.pyplot as plt
-
-vc = viewController.ViewController()
-
-SIZE = 200
-VIEW_SIZE = 50
-
 # pylint: disable=invalid-name
 # This is a test file, it uses tons of short variables used only
 # for visualization. Having understandable names for these is
@@ -24,6 +15,14 @@ VIEW_SIZE = 50
 # pylint: disable=too-many-locals
 # Rather too many local variables than using magic numbers.
 # Also, 9 arguments for function "plot" is necessary.
+import numpy as np
+import matplotlib.pyplot as plt
+import viewController
+
+vc = viewController.ViewController()
+
+SIZE = 200
+VIEW_SIZE = 50
 
 def test_main():
     """
@@ -64,7 +63,7 @@ def test_main():
     #Test so that theta can not be set to an invalid value.
     for test_theta in [20, 30, -10, 110]:
         assert testing_inappropriate_theta(test_theta)
-
+        
     print("Passed all tests")
 
 # Return 0 if x is negative, 180 if positive
@@ -102,8 +101,8 @@ def get_camera_angle_when_roll(roll):
 
 def testing_inappropriate_theta(theta):
     """
-    This function tests that if we a 
-    inappropriate we should 
+    This function tests that different 
+    thetas and checks if they are set correctly.
     """
     vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
@@ -111,12 +110,21 @@ def testing_inappropriate_theta(theta):
     return vc.theta_in < 90 and vc.theta_in >= 0
 
 def testing_inappropriate_height(height):
+    """
+    This function tests different heights
+    and checks if they are set correctly.
+    """"
     vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return vc.d_height >= 0 and vc.d_height < 10000
 
 def get_target_coordinate(coord):
+    """
+    This function inputs a coordinat, locks on it, and then
+    tries to move to another point. This should not be possible
+    since we looked on a specific coordinat. 
+    """
     vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
     vc.main()
@@ -125,6 +133,12 @@ def get_target_coordinate(coord):
     return(vc.aim_coordinate[0], vc.aim_coordinate[1])
 
 def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
+    """
+    This function plots the drone and its field of view. Red dot is
+    north, orange triangle is direction of drone, the X is where the
+    camera is aiming and blue triangle is the coordinate it focuses on,
+    if lock_on is true.
+    """
     d_long = 15
     d_lat = 15
     if lock_on:

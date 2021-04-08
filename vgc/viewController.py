@@ -26,8 +26,6 @@ OUTPUT to cameraFilter.py
 phi_final
 dist_from_center
 """
-import numpy as np
-
 # pylint: disable=no-self-use
 # There is no better place for these functions
 
@@ -36,6 +34,7 @@ import numpy as np
 
 # pylint: disable=invalid-name
 # ViewController is a valid fucking name, fuck off
+import numpy as np
 
 class ViewController():
 
