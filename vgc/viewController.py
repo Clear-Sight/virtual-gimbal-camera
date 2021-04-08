@@ -99,7 +99,8 @@ class ViewController():
             self.d_roll = roll # self.inputController.get_roll()
             self.d_pitch = pitch # self.inputController.get_pitch()
             self.d_yaw = yaw # self.inputController.get_yaw()
-            self.d_height = height # self.inputController.get_height()
+            if(height >= 0):
+                self.d_height = height # self.inputController.get_height()
             self.d_coordinate = (lon, lat) 
             self.new_fixhawk_values = True
 
@@ -109,9 +110,16 @@ class ViewController():
         SETTER
         """
         if(not self.new_server_values):
-            if(not lock_on):
-                self.theta_in = theta
-                self.phi_in = phi
+            if (not lock_on):
+                if (theta > 90):
+                    self.theta_in = 89
+                    self.phi_in = phi
+                elif (theta < 0):
+                    self.theta_in = 0
+                    self.phi_in = phi
+                else:
+                    self.theta_in = theta
+                    self.phi_in = phi
             if(lock_on == True and self.lock_on == False):
                 self.init_lock_on = True
             self.lock_on = lock_on
@@ -262,11 +270,9 @@ class ViewController():
                     self.aim_coordinate = self.point_to_coordinate(
                         self.theta_in, self.phi_in, 
                         self.d_height, self.d_coordinate)
-                    print(self.aim_coordinate)
                     self.init_lock_on = False
                 (t, p) = self.coordinate_to_point(self.d_coordinate, 
                 self.aim_coordinate, self.d_height)
-                print((t, p))
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(t, p)
 

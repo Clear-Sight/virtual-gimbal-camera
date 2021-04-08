@@ -14,42 +14,99 @@ SIZE = 200
 VIEW_SIZE = 50
 
 
+#CHECKLISTA
+# Testa giltig / ogiltig indata
+# Testa specialfall
+# Testa gränsfall
+# Försök få så hög täckning som möjligt
+# Repeterbarhet ska uppvisas.
+# Oberoende av andra moduler vid testning.
+# Kodstandard PEP-8 ska följas även vid utveckling av tester.
+# Tänk på hantering av ogiltig indata / utdata. Hantera den på lämpligt sätt.
+
+
+
 def test_main():
     """
-    This function is to be called to execute all the tests to ViewController.py
+    This function is to be called to execute all the tests to 
+    ViewController.py
+
+    Since viewController translates between different coordinate 
+    systems it cannot be expected to return exact expected values.
+    Instead, the numpy function allclose is used to compare expected
+    return values.
     """
-
-    #Test getting the right target coordiante even if we move
-    #print(get_target_coordinate(15, 15))
-    #assert np.allclose(get_target_coordinate(15, 15), (15, 15), 0.00000001, 0.00000001)
+    margin = 0.00000001 #Margin of error for functions' return values
     
+    # Test getting the right target coordiante even if we move
+    for test_coord in [(10, 13), (0, 0), (-13, -37)]:
+        assert np.allclose(get_target_coordinate(test_coord), 
+        test_coord, margin, margin)
+
+    # Test if theta is correct when we yaw
+    for testyaw in [45, -45, 360, 1066]:
+        assert np.allclose(get_camera_angle_when_yaw(testyaw)[0], 
+    45, margin)
     
+    # Test if theta is right when we roll
+    for testroll in [-10, 25, 40]:
+        assert np.allclose(get_camera_angle_when_roll(testroll), 
+        (45 + testroll, 90), margin, margin)
 
-    testroll = 34
-    print(get_camera_angle_when_roll(testroll))
-    assert np.allclose(get_camera_angle_when_roll(testroll), (90 + testroll, 90), 0.00000001, 0.00000001)
-    # test_lock_on()
+    # Test if theta and phi is right when we pitch
+    for testpitch in [-42, 69, 0.1]:
+        assert np.allclose(get_camera_angle_when_pitch(testpitch), 
+        (np.abs(testpitch), unitstep(testpitch)), margin, margin)
 
-    #assert main(504504, 6464, 646, 6464) == (theta_final, phi final)
-   # main(0, 0, 0, 10, 15, 15, 0, 45, False)
-   # assert main(0, 0, 0, 10, 15, 15, 0, 0, True) == ()
-    # more tests....
+    # Test if height doesn't change when entering an invalid value
+    for test_height in [-10, 10, 9999, 1000]:
+        assert testing_inappropriate_height(test_height)
+
+    print("Passed all tests")
+
+
+# Return 0 if x is negative, 180 if positive
+unitstep = lambda x : 0 if x <= 0 else 180 
+
+def get_camera_angle_when_pitch(pitch):
+    vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
+    vc.update_server_input(0, 0)
+    vc.main()
+    return(vc.theta_final, vc.phi_final)
+
+def get_camera_angle_when_yaw(yaw):
+    vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
+    vc.update_server_input(45, 0)
+    vc.main()
+    return(vc.theta_final, vc.phi_final)
 
 def get_camera_angle_when_roll(roll):
     vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
-    vc.update_server_input(90, 90, False)
+    vc.update_server_input(45, 90, False)
     vc.main()
     return (vc.theta_final, vc.phi_final)
 
-def get_target_coordinate(long, lat):
-    vc.update_fixhawk_input(0, 0, 0, 100, long, lat)
+def testing_inappropriate_theta(theta):
+    vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
+    vc.update_server_input(theta, 0, False)
+    vc.main()
+    return (vc.theta_in < 90 and vc.theta_in >= 0)
+
+def testing_inappropriate_height(height):
+    vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
+    vc.update_server_input(45, 90, False)
+    vc.main()
+    return vc.d_height >= 0 and vc.d_height < 10000
+
+def get_target_coordinate(coord):
+    vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
     vc.main()
     vc.update_server_input(25, 25, True)
     vc.main()
     return(vc.aim_coordinate[0], vc.aim_coordinate[1]) 
 
-def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height, redraw = False):
+def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     d_long = 15
     d_lat = 15
     if(lock_on):
@@ -120,42 +177,8 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height, redraw = 
 
     ### Kamerans sikte
     theta_final, phi_final = vc.theta_final, vc.phi_final
-    print(theta_final, phi_final)
     
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
     ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0), VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2), marker = 'x')
-    if(not redraw):
-        plt.show()
-    else:
-        plt.draw()
+    plt.show()
     
-
-def test_cos(n):
-    print("Calculating cos(3) ", n, " times...")
-    timethen = datetime.now()
-    for t in range(n):
-        x = np.cos(3)
-    print("Time taken: ", datetime.now() - timethen, "cos(3) = ", x)
-
-def test_cos_approx(n):
-    print("Approximating cos(3) ", n, " times...")
-    timethen = datetime.now()
-    for t in range(n):
-        x = (-1 + (1/2 * (3 - np.pi)**2))
-    print("Time taken: ", datetime.now() - timethen, "cos(3) = ", x)
-
-#test_main(30, 50, 15)
-if __name__ == "__main__":
-    print("Hej")
-
-def test_loop(times):
-    for t in range(10):
-        timethen = datetime.now()
-        for i in range(times):
-            theta = (i * 3)%90
-            phi = i + 3
-            theta_new, phi_new = vc.adjust_aim(theta, phi)
-        
-        timenow = datetime.now()
-        print("Time taken: ", timenow - timethen , "New theta and phi is: ", theta_new, phi_new)
-        
