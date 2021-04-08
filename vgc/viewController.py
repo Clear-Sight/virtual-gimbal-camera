@@ -1,6 +1,6 @@
 """
 This module is used adjust the camera on the drone accordingly to
-how we move in a three dimensional space. Input variables are from 
+how we move in a three dimensional space. Input variables are from
 the auto-pilot fixhawk that gives roll, yaw and pitch. We can also
 fix the view to a certaion point given longitude and latitude coordinates.
 
@@ -9,7 +9,7 @@ ViewController
 
 INPUT from inputRegulator.py
 (There is a setter to this.)
-theta_in 
+theta_in
 phi_in
 lock_on (true/false)
 
@@ -31,8 +31,8 @@ import numpy as np
 class ViewController():
     """
     The purpose of this class is provide with the functionality needed
-    in order to adjust the camera accordingly to how the drone moves in a 
-    three-dimensional space. The camera view is meant to be set to a fixed 
+    in order to adjust the camera accordingly to how the drone moves in a
+    three-dimensional space. The camera view is meant to be set to a fixed
     point.
 
     Functions in the class:
@@ -47,12 +47,11 @@ class ViewController():
     adjust_aim()
     main()
     """
-    
-    def __init__(self, image_radius):
+
+    def __init__(self):
         # Input controller. Communicates with the auto pilot FixHawk and
         # relays data from it.
-        #self.inputController = inputController
-        
+
         # INPUT VARIABLES FROM AUTO PILOT FIXHAWK
         # Roll, pitch and yaw are defined as the rotation around each axis 
         # with positive angle signifying a clockwise rotation. Roll is defined
@@ -63,7 +62,7 @@ class ViewController():
         self.d_yaw = 0
         self.d_height = 0 # Height in meters above sea level
         self.d_coordinate = (0, 0) # Longitude, latitude
-        
+
         # INPUT VARIABLES FROM WEB SERVER
         # Angles theta and phi are the spherical coordinates of where to look.
         # Theta = 0 means looking straight down, phi = 0 is looking north.
@@ -71,9 +70,9 @@ class ViewController():
         self.phi_in = 0
         self.lock_on = False
         self.init_lock_on = False
-        
+
         # VARIABLES FROM CONFIG FILE
-        self.IMAGE_RADIUS = 1080 # Needs to be fetched from file
+        self.image_radius = 1080 # Needs to be fetched from file
 
         # INTERNAL VARIABLES
         self.new_fixhawk_values = False
@@ -85,7 +84,7 @@ class ViewController():
         # These variables reflect where on the image feeded from the camera
         # we wish to look. If, say, we want to look north and in a 45-degree
         # angle and the drone has yawed right by 30 degrees, our phi_final
-        # would be -30 degrees and 
+        # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
         self.phi_final = 0 
         self.dist_from_center = 0
@@ -95,13 +94,13 @@ class ViewController():
         Updates data from the auto pilot adapter.
         SETTER
         """
-        if(not self.new_fixhawk_values):
-            self.d_roll = roll # self.inputController.get_roll()
-            self.d_pitch = pitch # self.inputController.get_pitch()
-            self.d_yaw = yaw # self.inputController.get_yaw()
-            if(height >= 0):
-                self.d_height = height # self.inputController.get_height()
-            self.d_coordinate = (lon, lat) 
+        if not self.new_fixhawk_values:
+            self.d_roll = roll
+            self.d_pitch = pitch
+            self.d_yaw = yaw
+            if height >= 0:
+                self.d_height = height
+            self.d_coordinate = (lon, lat)
             self.new_fixhawk_values = True
 
     def update_server_input(self, theta = 0, phi = 0, lock_on = False):
@@ -110,17 +109,17 @@ class ViewController():
         SETTER
         """
         if(not self.new_server_values):
-            if (not lock_on):
-                if (theta > 90):
+            if not lock_on:
+                if theta > 90:
                     self.theta_in = 89
                     self.phi_in = phi
-                elif (theta < 0):
+                elif theta < 0:
                     self.theta_in = 0
                     self.phi_in = phi
                 else:
                     self.theta_in = theta
                     self.phi_in = phi
-            if(lock_on == True and self.lock_on == False):
+            if(lock_on is True and self.lock_on is False):
                 self.init_lock_on = True
             self.lock_on = lock_on
             self.new_server_values = True
@@ -130,14 +129,14 @@ class ViewController():
         Returns the rotation matrix given the roll(y-axis), yaw(z-axis)
         and pitch(x-axis).
 
-        A positive roll indicates a clock-wise rotation as seen from 
+        A positive roll indicates a clock-wise rotation as seen from
         the negative side of the axis. This is the case for the pitch
-        as well. A positive yaw, however, indicates a clock-wise 
+        as well. A positive yaw, however, indicates a clock-wise
         rotation as seen from the positive side of the axis. One could
         also say "as seen from above". This reflects the way the
-        FixHawk roll, yaw and pitch work. Note that for rotation 
-        matrices the inverse and transponent are the same. So, if a 
-        counter-clockwise rotation is needed, the transponent can be 
+        FixHawk roll, yaw and pitch work. Note that for rotation
+        matrices the inverse and transponent are the same. So, if a
+        counter-clockwise rotation is needed, the transponent can be
         used.
         """
         roll_rad = np.deg2rad(roll)
@@ -158,7 +157,6 @@ class ViewController():
                                 [0, np.sin(pitch_rad), np.cos(pitch_rad)]
                                 ])
         return roll_matrix.dot(yaw_matrix.dot(pitch_matrix))
-
 
     def earth_radius_at_lat(self, d_lat):
         """
@@ -186,12 +184,11 @@ class ViewController():
                         [-np.cos(theta_rad)]
                         ])
 
-
     def spherical_to_angular(self, coord):
         """
         Translates a given spherical coordinate to an angular 
         coordinate.
-        
+
         Given a spherical coordinate on the form (x,y,z) this
         function will return it in its angular form (theta, phi).
         The input should be a numpy.matrix and the returned value is a
@@ -200,7 +197,6 @@ class ViewController():
         phi = np.arctan2(coord.item(0), coord.item(1))
         theta = np.arccos(-coord.item(2))
         return np.rad2deg(theta), np.rad2deg(phi) % 360
-
 
     def coordinate_to_point(self, coord1, coord2, z):
         """
@@ -215,26 +211,25 @@ class ViewController():
         x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
         y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
         phi = np.arctan2(x_diff, y_diff)
-
         theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / z)
-
         return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360  #Force phi to be positive
 
-
-    def point_to_coordinate(self, theta, phi, z, d_coord):
+    def point_to_coordinate(self, theta, phi, height, d_coord):
         """
         Calculates the coordinate existent at the center of view.
 
-        Argument theta and phi represent our aim, z is our height from
-        sea level and d_coord is the drone's current coordinate. This
-        function is used when lock_on mode first is initialized.
+        Argument theta and phi represent our aim, height is our 
+        height from sea level and d_coord is the drone's current 
+        coordinate. Thisfunction is used when lock_on mode first is 
+        initialized.
         """
-        p_lat = np.deg2rad(d_coord[1]) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
-                np.sin(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
-        p_long = np.deg2rad(d_coord[0]) + np.arctan( (z * np.tan(np.deg2rad(theta))*\
-                 np.cos(np.deg2rad(phi)) ) / self.earth_radius_at_lat(d_coord[1]) )
+        p_lat = np.deg2rad(d_coord[1]) +\
+            np.arctan((height * np.tan(np.deg2rad(theta))*\
+            np.sin(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+        p_long = np.deg2rad(d_coord[0]) +\
+            np.arctan((height * np.tan(np.deg2rad(theta))*\
+            np.cos(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
         return np.rad2deg(p_long), np.rad2deg(p_lat) 
-
 
     def adjust_aim(self, theta, phi):
         """
@@ -247,12 +242,12 @@ class ViewController():
         The input should be the two angles seperated and the output is
         a new theta and phi in a tuple.
         """
-        inverse_rotation_matrix = self.rotation_matrix(self.d_roll, self.d_yaw, self.d_pitch).transpose()
+        inverse_rotation_matrix = self.rotation_matrix(self.d_roll,
+        self.d_yaw, self.d_pitch).transpose()
         aim_spherical = self.angular_to_spherical(theta, phi)
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-        
     def main(self):
         """
         Main-function that runs all the time and updates our view 
@@ -261,35 +256,31 @@ class ViewController():
         looking. Then you can call the getter-function to recieve 
         the updated values.
         """
-
-        if(self.new_fixhawk_values or self.new_server_values):
+        if self.new_fixhawk_values or self.new_server_values:
             self.new_fixhawk_values = True
             self.new_server_values = True
-            if(self.lock_on):
-                if(self.init_lock_on):
+            if self.lock_on:
+                if self.init_lock_on:
                     self.aim_coordinate = self.point_to_coordinate(
                         self.theta_in, self.phi_in, 
                         self.d_height, self.d_coordinate)
                     self.init_lock_on = False
-                (t, p) = self.coordinate_to_point(self.d_coordinate, 
-                self.aim_coordinate, self.d_height)
+                (theta_temp, phi_temp) = self.coordinate_to_point(
+                    self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
-                self.adjust_aim(t, p)
-
-                self.dist_from_center = self.IMAGE_RADIUS * \
-                np.sin(self.theta_final)
-                
+                self.adjust_aim(theta_temp, phi_temp)
+                self.dist_from_center = self.image_radius * \
+                np.sin(self.theta_final)    
                 self.new_fixhawk_values = False
                 self.new_server_values = False
             else:
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(self.theta_in, self.phi_in)
-                self.dist_from_center = self.IMAGE_RADIUS * \
+                self.dist_from_center = self.image_radius * \
                 np.sin(self.theta_final)
                 self.new_server_values = False 
                 self.new_fixhawk_values = False
               
-
     def get_image_point(self):
         """
         Returns our phi_final and dist_from_center. This can be used by
