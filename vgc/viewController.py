@@ -34,6 +34,10 @@ dist_from_center
 
 # pylint: disable=invalid-name
 # ViewController is a valid fucking name, fuck off
+
+# pylint: disable=too-many-arguments
+# 7 arguments is needed for this function.
+
 import numpy as np
 
 class ViewController():
@@ -97,10 +101,6 @@ class ViewController():
         self.dist_from_center = 0
 
     def update_fixhawk_input(self, roll, yaw, pitch, height, lon, lat):
-
-        # pylint: disable=too-many-arguments
-        # 7 arguments is needed for this function.
-
         """
         Updates data from the auto pilot adapter.
         SETTER
