@@ -6,38 +6,24 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 vc = viewController.ViewController(1080)
 from matplotlib.patches import Rectangle, PathPatch
-import mpl_toolkits.mplot3d.art3d as art3d 
-
-
+import mpl_toolkits.mplot3d.art3d as art3d
 
 SIZE = 200
 VIEW_SIZE = 50
 
 
-#CHECKLISTA
-# Testa giltig / ogiltig indata
-# Testa specialfall
-# Testa gränsfall
-# Försök få så hög täckning som möjligt
-# Repeterbarhet ska uppvisas.
-# Oberoende av andra moduler vid testning.
-# Kodstandard PEP-8 ska följas även vid utveckling av tester.
-# Tänk på hantering av ogiltig indata / utdata. Hantera den på lämpligt sätt.
-
-
-
 def test_main():
     """
-    This function is to be called to execute all the tests to 
+    This function is to be called to execute all the tests to
     ViewController.py
 
-    Since viewController translates between different coordinate 
+    Since viewController translates between different coordinate
     systems it cannot be expected to return exact expected values.
     Instead, the numpy function allclose is used to compare expected
     return values.
     """
     margin = 0.00000001 #Margin of error for functions' return values
-    
+
     # Test getting the right target coordiante even if we move
     for test_coord in [(10, 13), (0, 0), (-13, -37)]:
         assert np.allclose(get_target_coordinate(test_coord), 
@@ -47,10 +33,10 @@ def test_main():
     for testyaw in [45, -45, 360, 1066]:
         assert np.allclose(get_camera_angle_when_yaw(testyaw)[0], 
     45, margin)
-    
+
     # Test if theta is right when we roll
     for testroll in [-10, 25, 40]:
-        assert np.allclose(get_camera_angle_when_roll(testroll), 
+        assert np.allclose(get_camera_angle_when_roll(testroll),
         (45 + testroll, 90), margin, margin)
 
     # Test if theta and phi is right when we pitch
@@ -64,9 +50,8 @@ def test_main():
 
     print("Passed all tests")
 
-
 # Return 0 if x is negative, 180 if positive
-unitstep = lambda x : 0 if x <= 0 else 180 
+unitstep = lambda x : 0 if x <= 0 else 180
 
 def get_camera_angle_when_pitch(pitch):
     vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
@@ -104,7 +89,7 @@ def get_target_coordinate(coord):
     vc.main()
     vc.update_server_input(25, 25, True)
     vc.main()
-    return(vc.aim_coordinate[0], vc.aim_coordinate[1]) 
+    return(vc.aim_coordinate[0], vc.aim_coordinate[1])
 
 def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     d_long = 15
@@ -142,13 +127,8 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
     z = (VIEW_SIZE)*np.cos(v)
     ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
-    
 
     # Marken
-    #rect = Rectangle((-SIZE,SIZE), SIZE*2, SIZE*2, -90, alpha=0.4)
-    #ax.add_patch(rect)
-    #art3d.pathpatch_2d_to_3d(rect, z=-height, zdir="z")
-
     point = np.array([[0], [0], [-height]])
     point = rot_matrix_inv.dot(point)
     normal = np.array([[0], [0], [1]])
@@ -159,7 +139,6 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     xx, yy = np.meshgrid(range(-SIZE,SIZE+100,100), range(-SIZE,SIZE+100,100), sparse = True)
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
     ax.plot_surface(xx, yy, z, alpha = 0.5)
-
 
     # plotta sökt koordinat
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
@@ -177,7 +156,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
 
     ### Kamerans sikte
     theta_final, phi_final = vc.theta_final, vc.phi_final
-    
+
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
     ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0), VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2), marker = 'x')
     plt.show()
