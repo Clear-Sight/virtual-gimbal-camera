@@ -163,21 +163,21 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     rot_matrix = vc.rotation_matrix(roll, yaw, pitch)
     rot_matrix_inv = rot_matrix.transpose()
 
-    # Figur
+    # Figure
     fig = plt.figure()
     ax = fig.gca(projection='3d', xlim=(-1 * SIZE, SIZE), ylim=(-1 * SIZE, SIZE),
     zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
     ax.set_ylabel('Drönarens riktning (y)')
     ax.set_xlabel('Drönarens sidor (x)')
 
-    # Plotta kamerans sfär
+    # Plot camera sphere
     u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
     x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
     y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
     z = -(VIEW_SIZE)*np.cos(v)
     ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
 
-    # Plotta marken
+    # Plot ground
     point = np.array([[0], [0], [-height]])
     point = rot_matrix_inv.dot(point)
     normal = np.array([[0], [0], [1]])
@@ -190,28 +190,27 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
     ax.plot_surface(xx, yy, z, alpha = 0.5)
 
-    # Plotta sökt koordinat
+    # Plot target coordinate
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
     ax.scatter(p_3dcoordinate.item(0), p_3dcoordinate.item(1),
     p_3dcoordinate.item(2), marker = '^')
 
-    # plotta drönarens riktning
+    # Plot drone direction
     drone_dir = vc.angular_to_spherical(90, 0)
 
     ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1),
     drone_dir.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
-    # Norr
+    # Plot North
     north = rot_matrix_inv.dot(drone_dir)
     ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
     VIEW_SIZE * north.item(2), marker='o')
 
-    # Kamerans sikte
+    # Plot camera angle
     theta_final, phi_final = vc.theta_final, vc.phi_final
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
     ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0),
     VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
     marker = 'x')
     plt.show()
-    
