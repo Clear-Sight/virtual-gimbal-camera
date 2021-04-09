@@ -1,9 +1,6 @@
 """
 Software interface for the autopilot
 """
-import time
-from pymavlink import mavutil
-
 
 def connecting_with_autopilot():
     """ Connect to the Vehicle """
