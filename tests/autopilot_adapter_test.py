@@ -1,7 +1,7 @@
 """
 Test for autopilot_adapter.py
 """
-from vgc import autopilot_adpter
+import vgc.autopilot_adapter as autopilot_adapter
 
 def is_yaw_pitch_roll_float(vehicle):
     """Float control for the roll,pitch and yaw"""
