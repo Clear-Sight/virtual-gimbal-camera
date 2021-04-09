@@ -17,7 +17,7 @@ which executes all the different testfunctions.
 # Also, 9 arguments for function "plot" is necessary.
 import numpy as np
 import matplotlib.pyplot as plt
-import viewController
+import vgc.viewController as viewController
 
 vc = viewController.ViewController()
 
