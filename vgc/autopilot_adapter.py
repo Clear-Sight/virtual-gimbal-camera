@@ -1,11 +1,9 @@
 """
-Test for autopilot_adapter.py
-"""
-"""
 Software interface for the autopilot
 """
 
 import time
+
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """  
 
@@ -29,29 +27,32 @@ class Vehicle:
             lis = self.connection.recv_match(type ="GPS_RAW_INT")
         return lis
 
-    def get_pitch(self):
+    @property
+    def pitch(self):
         """ Get vehicle pitch """
-        pitch = self.get_attitude_massage().pitch
-        return float(pitch)
-
-    def get_yaw(self):
+        return float(self.get_attitude_massage().pitch)
+    
+    @property
+    def yaw(self):
         """ Get vehicle yaw """
-        yaw = self.get_attitude_massage().yaw
-        return float(yaw)
-
-    def get_roll(self):
+        return float(self.get_attitude_massage().yaw)
+    
+    @property
+    def roll(self):
         """ Get vehicle roll """
-        roll = self.get_attitude_massage().roll
-        return float(roll)
+        return float(self.get_attitude_massage().roll)
 
-    def get_lat(self):
+    @property
+    def latitude(self):
         """ Get vehicle latitude """
         return float(self.get_GPS_data_massage().lat)
 
-    def get_lon(self):
+    @property
+    def longitude(self):
         """ Get vehicle longitude """
         return float(self.get_GPS_data_massage().lon)
 
-    def get_alt(self):
+    @property
+    def altitude(self):
         """ Get vehicle altitude """
         return float(self.get_GPS_data_massage().alt)
