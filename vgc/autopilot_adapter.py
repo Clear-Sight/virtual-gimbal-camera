@@ -3,6 +3,7 @@ Software interface for the autopilot
 """
 
 import time
+from pymavlink import mavutil
 
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """  
