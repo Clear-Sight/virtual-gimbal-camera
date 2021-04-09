@@ -1,13 +1,7 @@
 """
 Test for autopilot.py
 """
-from autopilot import get_roll
-from autopilot import get_pitch
-from autopilot import get_yaw
-from autopilot import get_lat
-from autopilot import get_lon
-from autopilot import get_alt
-from autopilot import connecting_with_autopilot
+from . import autopilot
 
 def is_yaw_pitch_roll_float(vehicle):
     """Float control for the roll,pitch and yaw"""
@@ -26,7 +20,7 @@ def is_gps_float(vehicle):
 
 def autopilot_adapter_test():
     """test all test functions"""
-    vehicle = connecting_with_autopilot()
+    vehicle = autopilot.connecting_with_autopilot()
     assert is_yaw_pitch_roll_float and is_gps_float(vehicle)
 
 
