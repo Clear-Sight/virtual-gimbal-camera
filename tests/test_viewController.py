@@ -58,11 +58,11 @@ def test_main():
 
     # Test if height doesn't change when entering an invalid value
     for test_height in [-10, 10, 9999, 1000]:
-        assert testing_inappropriate_height(test_height)
+        assert get_inappropriate_height(test_height)
 
     #Test so that theta can not be set to an invalid value.
     for test_theta in [20, 30, -10, 110]:
-        assert testing_inappropriate_theta(test_theta)
+        assert get_inappropriate_theta(test_theta)
 
     print("Passed all tests")
 
@@ -99,7 +99,7 @@ def get_camera_angle_when_roll(roll):
     vc.main()
     return (vc.theta_final, vc.phi_final)
 
-def testing_inappropriate_theta(theta):
+def get_inappropriate_theta(theta):
     """
     This function tests that different
     thetas and checks if they are set correctly.
@@ -109,7 +109,7 @@ def testing_inappropriate_theta(theta):
     vc.main()
     return vc.theta_in < 90 and vc.theta_in >= 0
 
-def testing_inappropriate_height(height):
+def get_inappropriate_height(height):
     """
     This function tests different heights
     and checks if they are set correctly.
