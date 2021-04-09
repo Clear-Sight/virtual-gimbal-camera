@@ -1,7 +1,6 @@
 """
 Software interface for the autopilot
 """
-import time
 
 
 class Vehicle:
