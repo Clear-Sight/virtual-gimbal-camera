@@ -1,7 +1,8 @@
 """
 Test for autopilot_adapter.py
 """
-import vgc.autopilot_adapter as autopilot_adapter
+from . import config
+from vgc import autopilot_adapter
 
 def is_yaw_pitch_roll_float(vehicle):
     """Float control for the roll,pitch and yaw"""
@@ -18,10 +19,11 @@ def is_gps_float(vehicle):
     return isinstance(lat, float) and isinstance(lon, float) and isinstance(alt, float)
 
 
-def autopilot_adapter_test():
-    """test all test functions"""
-    vehicle_1 = Vehicle(mavutil.mavlink_connection("/dev/ttyAMA0", 57600))
-    assert is_yaw_pitch_roll_float(vehicle) and is_gps_float(vehicle)
+def test_autopilot_adapter():
+    """test all test functions localy"""
+    if config.CONFIG['local']:
+        vehicle_1 = Vehicle(mavutil.mavlink_connection("/dev/ttyAMA0", 57600))
+        assert is_yaw_pitch_roll_float(vehicle) and is_gps_float(vehicle)
 
 
 
