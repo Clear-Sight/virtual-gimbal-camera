@@ -1,4 +1,4 @@
-# drone-feed-cropping
+# Virtual gimbal-camera
 
 This is a  project to be able to crop, zoom and stabilize a feed from a 180+ degree camera.
 
