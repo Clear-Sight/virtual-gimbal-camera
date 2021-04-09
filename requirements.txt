@@ -14,3 +14,4 @@ regex==2020.11.13
 toml==0.10.2
 typed-ast==1.4.2
 typing-extensions==3.7.4.3
+matplotlib==3.4.1
