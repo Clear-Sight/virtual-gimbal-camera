@@ -1,4 +1,13 @@
 """Filters a video stream.
+
+Class CameraFilter - Crops, rotates and scales a videostream
+
+Functions in CameraFiler:
+    __init__(self) - Initialize variables
+    __del__(self) - Deletes the thread
+    update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+    stop(self) - Stops the camera filter
+    start(self) - Starts the camera filter
 """
 import threading
 import cv2
@@ -9,11 +18,23 @@ from . import config
 
 
 class CameraFilter(Filter):
-    """Filters a video stream
+    """Filters a video stream.
 
         This filter rotates and cropps a video stream according to
-        a pitch, a jaw and a zoom variable. The pistch, jaw and zoom
-        variables are updated asynchronously through the update funciton.
+        a pitch, a jaw and a zoom variable. The videostream is from
+        a 180+ degree camera pointing straigt down. To mimic a gimal
+        camera the pitch, jaw and zoom variables are the angle,
+        rotation and zoom needed to look at a specific poriton of
+        the 180+ degree video stream.
+        The pitch, jaw and zoom variables are updated asynchronously
+        through the update funciton.
+
+        Functions in the class:
+            __init__(self) - Initialize variables
+            __del__(self) - Deletes the thread
+            update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+            stop(self) - Stops the camera filter
+            start(self) - Starts the camera filter
     """
 
     def __init__(self):
@@ -80,17 +101,17 @@ class CameraFilter(Filter):
                 self.sem.acquire()
                 # Get rotation matrix
                 matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
-                                                  self.jaw_in, 1)
+                                                self.jaw_in, 1)
                 # Aply rotation matrix
                 rotated_frame = cv2.warpAffine(frame, matrix,
                                                (w_frame, h_frame))
                 # Crop the frame
                 crop_frame = cv2.getRectSubPix(rotated_frame,
-                                                (int(width*self.zoom_in),
-                                                 int(height*self.zoom_in)),
-                                                (w_frame/2, h_frame/2
-                                                 - height*self.zoom_in/2
-                                                 + self.pitch_in))
+                                               (int(width*self.zoom_in),
+                                                int(height*self.zoom_in)),
+                                               (w_frame/2, h_frame/2
+                                                - height*self.zoom_in/2
+                                                + self.pitch_in))
                 # Resize the frame
                 final_frame = cv2.resize(crop_frame, (width,height))
 
