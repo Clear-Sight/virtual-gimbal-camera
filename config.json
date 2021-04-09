@@ -1,6 +1,7 @@
 {
 
 "domain": " ",
-"debug": true
-
+"debug": true,
+"local": false
+  
 }
