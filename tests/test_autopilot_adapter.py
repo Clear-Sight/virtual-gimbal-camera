@@ -6,16 +6,16 @@ from vgc import autopilot_adapter
 
 def is_yaw_pitch_roll_float(vehicle):
     """Float control for the roll,pitch and yaw"""
-    roll  = get_roll(vehicle)
-    pitch = get_pitch(vehicle)
-    yaw   = get_yaw(vehicle)
+    roll  = vehicle.roll
+    pitch = vehicle.pitch
+    yaw   = vehicle.yaw
     return isinstance(roll, float) and isinstance(pitch, float) and isinstance(yaw, float)
 
 def is_gps_float(vehicle):
     """Float control for GPS data"""
-    lat  = get_lat(vehicle)
-    lon = get_lon(vehicle)
-    alt   = get_alt(vehicle)
+    lat = vehicle.latitude
+    lon = vehicle.longitude
+    alt = vehicle.altitude
     return isinstance(lat, float) and isinstance(lon, float) and isinstance(alt, float)
 
 
