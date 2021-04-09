@@ -1,9 +1,9 @@
 from time import sleep
-from vgc.cameraFilter import CameraFilter 
+from vgc.cameraFilter import CameraFilter
 
 def test_camerafilter():
     """Testing the Came"""
-    cf = CameraFilter([])
+    cf = CameraFilter()
     sleep(4)
     cf.update(6, 10, 2)
     sleep(4)
