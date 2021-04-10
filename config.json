@@ -1,6 +1,9 @@
 {
+"domain": "localhost",
+"debug": true,
 
-"domain": " ",
-"debug": true
+"cam_width": 640,
+"cam_height": 480,
+"cam_input": 0
 
 }
