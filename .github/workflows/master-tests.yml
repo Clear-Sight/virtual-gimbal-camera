@@ -2,7 +2,7 @@
 
 name: build and tests master
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the development branch
   push:
@@ -19,7 +19,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         python-version: [3.8]
@@ -33,15 +33,14 @@ jobs:
       # Runs a single command using the runners shell
       - name: Setup Python ${{matrix.python-cersion}}
         uses: actions/setup-python@v1
-        with: 
+        with:
           python-version: ${{matrix.python-cersion}}
-        
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest
           pip install -r requirements.txt
-          sh build.sh
-          
+
       - name: Test with pytest
         run: python -m pytest
