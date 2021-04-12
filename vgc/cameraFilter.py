@@ -55,7 +55,7 @@ class CameraFilter:
         self.thread = threading.Thread(target=self.main)
 
         # Get ouptuptAdapter
-        self.output_adapter = outputAdapter.outputAdapter()
+        self.output_adapter = outputAdapter.OutputAdapter()
 
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
