@@ -8,9 +8,9 @@ from pymavlink import mavutil
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """  
 
-    def __init__(self,connection ):
+    def __init__(self):
         """ Initiates connection """
-        self.connection = connection
+        self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
 
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
