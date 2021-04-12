@@ -1,82 +1,128 @@
 """Filters a video stream.
 
+Class CameraFilter - Crops, rotates and scales a videostream
+
+Functions in CameraFiler:
+    __init__(self) - Initialize variables
+    __del__(self) - Deletes the thread
+    update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+    stop(self) - Stops the camera filter
+    start(self) - Starts the camera filter
 """
 import threading
 import cv2
 
 from .filter import Filter
+from .io import outputAdapter
+from . import config
 
 
-class cameraFilter(Filter):
-    """Filters a video stream
-            
-        This filter rotates and cropps a video stream according to a pitch, a jaw and a zoom variable . 
-        The pitch, jaw and zoom variables are updated asynchronously through the update funciton.
-    
+class CameraFilter(Filter):
+    """Filters a video stream.
+
+        This filter rotates and cropps a video stream according to
+        a pitch, a jaw and a zoom variable. The videostream is from
+        a 180+ degree camera pointing straigt down. To mimic a gimal
+        camera the pitch, jaw and zoom variables are the angle,
+        rotation and zoom needed to look at a specific poriton of
+        the 180+ degree video stream.
+        The pitch, jaw and zoom variables are updated asynchronously
+        through the update funciton.
+
+        Functions in the class:
+            __init__(self) - Initialize variables
+            __del__(self) - Deletes the thread
+            update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+            stop(self) - Stops the camera filter
+            start(self) - Starts the camera filter
     """
 
-    def __init__(self, arg):
-        """Docstring"""
+    def __init__(self):
+        """Initializes the Camerafilter.
+
+        Sets some default starting values
+        Initializes and starts the CameraFilter thread.
+        """
+
         super().__init__()
 
         # Set defaults
-        self.yaw_in, self.pitch_in, self.zoom_in = 0,0,1
+        self.jaw_in, self.pitch_in, self.zoom_in = 0,0,1
+        self.stopped = False
 
-        #Init thread
+        # Init thread
         self.sem = threading.Semaphore()
         self.thread = threading.Thread(target=self.start)
         self.thread.start()
+        self.output_adapter = outputAdapter.outputAdapter()
 
     def __del__(self):
-        """Docstring"""
+        """Deletes the thread if the CameraFilter is deleted."""
         self.thread._delete()
 
     def update(self, jaw_in, pitch_in, zoom_in):
-        """Docstring"""
+        """Updates the cropping values of the CameraFilter."""
         self.sem.acquire()
         self.jaw_in = jaw_in
         self.pitch_in = pitch_in
-        self.zoom_in = zoom_in 
+        self.zoom_in = zoom_in
         self.sem.release()
 
+    def stop(self):
+        """Stops the Camerafilter."""
+        self.stopped=True
+
     def start(self):
-        """Docstring"""
-        cap = cv2.VideoCapture(0)
+        """The main function of the class.
+
+        Takes input videostream input.
+        Crops and rotates according to jaw_in, pitch_in and zoom_in.
+        Outputs the proccesed videostream.
+        """
+        cap = cv2.VideoCapture(config.CONFIG['cam_input'])
 
         cnt = 0  # Initialize frame counter
 
         # Some characteristics from the original video
         w_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h_frame = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
-        # Croping values
-        w = 640    
-        h = 480 
+        # Getting width and height of output from config file
+        width = config.CONFIG['cam_width']
+        height = config.CONFIG['cam_height']
 
-        # The output
-        #fourcc = cv2.VideoWriter_fourcc(*´XVID´)
-        #out = cv2.VideoWriter(´result.avi´, fourcc, fps, (w, h))
 
-        while(cap.isOpened()):
-            ret, frame = cap.read()  # Capture frame by frame
+        while(cap.isOpened() and not self.stopped):
+            ret, frame = cap.read()  # Capture frame by frames
             cnt += 1  # Counting the frames
 
-            # Avoid problems when video finish 
+            # Avoid problems when video finish
             if ret:
                 self.sem.acquire()
                 # Get rotation matrix
-                M = cv2.getRotationMatrix2D((w_frame/2, h_frame/2), self.jaw_in, 1)
+                matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
+                                                self.jaw_in, 1)
                 # Aply rotation matrix
-                rotated_frame = cv2.warpAffline(frame, M, (w_frame, h_frame))
+                rotated_frame = cv2.warpAffine(frame, matrix,
+                                               (w_frame, h_frame))
                 # Crop the frame
-                crop_frame = cv2.getRectSubPix(rotated_frame, (int(w*self.zoom_in), int(h*self.zoom_in)), (w_frame/2, h_frame/2 - h*self.zoom_in/2 + self.pitch_in))
+                crop_frame = cv2.getRectSubPix(rotated_frame,
+                                               (int(width*self.zoom_in),
+                                                int(height*self.zoom_in)),
+                                               (w_frame/2, h_frame/2
+                                                - height*self.zoom_in/2
+                                                + self.pitch_in))
                 # Resize the frame
-                final_frame = cv2.resize(crop_frame, (w,h))
+                final_frame = cv2.resize(crop_frame, (width,height))
+
+                try:
+                    self.output_adapter.send(final_frame)
+                    cv2.waitKey(1)
+                except KeyboardInterrupt:
+                    self.stopped = True
+
                 self.sem.release()
 
-            cap.release()
-            #out.release()
-            cv2.destroyAllWindows()
+        cap.release()
 
+        cv2.destroyAllWindows()

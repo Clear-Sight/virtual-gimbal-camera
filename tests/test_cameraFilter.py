@@ -1,8 +1,5 @@
-
-from vgc.cameraFilter import cameraFilter 
+from time import sleep
+from vgc.cameraFilter import CameraFilter 
 
 def test_camerafilter():
-    cf = cameraFilter([])
     assert True
-
-    
