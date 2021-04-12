@@ -31,10 +31,10 @@ class CameraFilter(Filter):
 
         Functions in the class:
             __init__(self) - Initialize variables
-            __del__(self) - Deletes the thread
             update(self, jaw_in, pitch_in, zoom_in) - Updates variables
             stop(self) - Stops the camera filter
             start(self) - Starts the camera filter
+            main(self) - Main loop of the camerafilter
     """
 
     def __init__(self):
@@ -52,13 +52,8 @@ class CameraFilter(Filter):
 
         # Init thread
         self.sem = threading.Semaphore()
-        self.thread = threading.Thread(target=self.start)
-        self.thread.start()
+        self.thread = threading.Thread(target=self.main)
         self.output_adapter = outputAdapter.outputAdapter()
-
-    def __del__(self):
-        """Deletes the thread if the CameraFilter is deleted."""
-        #self.thread._delete()
 
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
@@ -73,6 +68,10 @@ class CameraFilter(Filter):
         self.stopped=True
 
     def start(self):
+        """Starts the Camerafilter."""
+-       self.thread.start()
+
+    def main(self):
         """The main function of the class.
 
         Takes input videostream input.
@@ -80,6 +79,9 @@ class CameraFilter(Filter):
         Outputs the proccesed videostream.
         """
         cap = cv2.VideoCapture(config.CONFIG['cam_input'])
+
+        if not cap.isOpened():
+            raise ValueError("No camera")
 
         cnt = 0  # Initialize frame counter
 
@@ -92,7 +94,7 @@ class CameraFilter(Filter):
         height = config.CONFIG['cam_height']
 
 
-        while(cap.isOpened() and not self.stopped):
+        while not self.stopped:
             ret, frame = cap.read()  # Capture frame by frames
             cnt += 1  # Counting the frames
 
@@ -102,7 +104,7 @@ class CameraFilter(Filter):
                 # Get rotation matrix
                 matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
                                                 self.jaw_in, 1)
-                # Aply rotation matrix
+                # Apply rotation matrix
                 rotated_frame = cv2.warpAffine(frame, matrix,
                                                (w_frame, h_frame))
                 # Crop the frame
