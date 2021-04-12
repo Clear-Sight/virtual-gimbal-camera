@@ -22,7 +22,7 @@ def is_gps_float(vehicle):
 def test_autopilot_adapter():
     """test all test functions localy"""
     if config.CONFIG['local']:
-        vehicle_1 = Vehicle(mavutil.mavlink_connection("/dev/ttyAMA0", 57600))
+        vehicle = Vehicle(mavutil.mavlink_connection("/dev/ttyAMA0", 57600))
         assert is_yaw_pitch_roll_float(vehicle) and is_gps_float(vehicle)
 
 
