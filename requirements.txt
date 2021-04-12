@@ -30,3 +30,4 @@ wrapt==1.12.1
 pymavlink==2.4.14
 zmq==0.0.0
 future==0.18.2
+matplotlib==1.15.0
