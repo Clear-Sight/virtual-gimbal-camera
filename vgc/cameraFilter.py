@@ -12,12 +12,11 @@ Functions in CameraFiler:
 import threading
 import cv2
 
-from .filter import Filter
 from .io import outputAdapter
 from . import config
 
 
-class CameraFilter(Filter):
+class CameraFilter:
     """Filters a video stream.
 
         This filter rotates and cropps a video stream according to
@@ -37,7 +36,7 @@ class CameraFilter(Filter):
             main(self) - Main loop of the camerafilter
     """
 
-    def __init__(self):
+    def __init__(self, pipeline):
         """Initializes the Camerafilter.
 
         Sets some default starting values
@@ -45,23 +44,26 @@ class CameraFilter(Filter):
         """
 
         super().__init__()
+        self.pipeline = pipeline
 
         # Set defaults
         self.jaw_in, self.pitch_in, self.zoom_in = 0,0,1
         self.stopped = False
 
         # Init thread
-        self.sem = threading.Semaphore()
+        self.semaphore = threading.Semaphore()
         self.thread = threading.Thread(target=self.main)
+
+        # Get ouptuptAdapter
         self.output_adapter = outputAdapter.outputAdapter()
 
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
-        self.sem.acquire()
+        self.semaphore.acquire()
         self.jaw_in = jaw_in
         self.pitch_in = pitch_in
         self.zoom_in = zoom_in
-        self.sem.release()
+        self.semaphore.release()
 
     def stop(self):
         """Stops the Camerafilter."""
@@ -69,7 +71,7 @@ class CameraFilter(Filter):
 
     def start(self):
         """Starts the Camerafilter."""
--       self.thread.start()
+        self.thread.start()
 
     def main(self):
         """The main function of the class.
@@ -100,8 +102,7 @@ class CameraFilter(Filter):
 
             # Avoid problems when video finish
             if ret:
-                self.sem.acquire()
-                # Get rotation matrix
+                self.semaphore.acquire() # Get rotation matrix
                 matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
                                                 self.jaw_in, 1)
                 # Apply rotation matrix
@@ -122,7 +123,8 @@ class CameraFilter(Filter):
                 except KeyboardInterrupt:
                     self.stopped = True
 
-                self.sem.release()
+
+                self.semaphore.release()
 
         cap.release()
 
