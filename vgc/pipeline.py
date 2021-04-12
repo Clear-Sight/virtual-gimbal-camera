@@ -23,6 +23,6 @@ class Pipeline:
 
     def start(self):
         """ Starts all the threads """
-        #self.camera_filter.start()
+        self.camera_filter.start()
         self.view_controller.start()
         self.input_adapter.start()
