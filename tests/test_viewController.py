@@ -1,3 +1,5 @@
+
+
 """
 This module is used to test the functionality in
 viewController.py. The main function is test_main()
@@ -15,6 +17,8 @@ which executes all the different testfunctions.
 # pylint: disable=too-many-locals
 # Rather too many local variables than using magic numbers.
 # Also, 9 arguments for function "plot" is necessary.
+
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import vgc.viewController as viewController
@@ -26,7 +30,7 @@ VIEW_SIZE = 50
 
 def test_main():
     return True
-
+"""
     """
     This function is to be called to execute all the tests to
     ViewController.py
@@ -35,6 +39,7 @@ def test_main():
     systems it cannot be expected to return exact expected values.
     Instead, the numpy function allclose is used to compare expected
     return values.
+    """
     """
     margin = 0.00000001 #Margin of error for functions' return values
 
@@ -73,8 +78,10 @@ unitstep = lambda x : 0 if x <= 0 else 180
 
 def get_camera_angle_when_pitch(pitch):
     """
+    """
     This function tests if the camera angle
     behaves accordingly if the drone pitches.
+    """
     """
     vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
@@ -83,8 +90,10 @@ def get_camera_angle_when_pitch(pitch):
 
 def get_camera_angle_when_yaw(yaw):
     """
+    """
     This function tests if the camera angle
     behaves accordingly if the drone yaws.
+    """
     """
     vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
@@ -93,8 +102,10 @@ def get_camera_angle_when_yaw(yaw):
 
 def get_camera_angle_when_roll(roll):
     """
+    """
     This function tests if the camera angle
     behaves accordingly if the drone rolls.
+    """
     """
     vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
@@ -103,8 +114,10 @@ def get_camera_angle_when_roll(roll):
 
 def get_inappropriate_theta(theta):
     """
+    """
     This function tests that different
     thetas and checks if they are set correctly.
+    """
     """
     vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
@@ -113,8 +126,10 @@ def get_inappropriate_theta(theta):
 
 def get_inappropriate_height(height):
     """
+    """
     This function tests different heights
     and checks if they are set correctly.
+    """
     """
     vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
     vc.update_server_input(45, 90, False)
@@ -123,9 +138,11 @@ def get_inappropriate_height(height):
 
 def get_target_coordinate(coord):
     """
+    """
     This function inputs a coordinat, locks on it, and then
     tries to move to another point. This should not be possible
     since we looked on a specific coordinat.
+    """
     """
     vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
@@ -136,10 +153,12 @@ def get_target_coordinate(coord):
 
 def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     """
+    """
     This function plots the drone and its field of view. Red dot is
     north, orange triangle is direction of drone, the X is where the
     camera is aiming and blue triangle is the coordinate it focuses on,
     if lock_on is true.
+    """
     """
     d_long = 15
     d_lat = 15
@@ -216,3 +235,4 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
     marker = 'x')
     plt.show()
+    """
