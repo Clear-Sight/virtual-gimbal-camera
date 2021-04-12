@@ -27,6 +27,5 @@ toml==0.10.2
 typed-ast==1.4.2
 typing-extensions==3.7.4.3
 wrapt==1.12.1
-time==3.7.3
 pymavlink==2.4.14
 zmq==0.0.0
