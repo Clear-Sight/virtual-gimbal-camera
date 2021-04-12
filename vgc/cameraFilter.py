@@ -58,7 +58,7 @@ class CameraFilter(Filter):
 
     def __del__(self):
         """Deletes the thread if the CameraFilter is deleted."""
-        self.thread._delete()
+        #self.thread._delete()
 
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
@@ -114,7 +114,6 @@ class CameraFilter(Filter):
                                                 + self.pitch_in))
                 # Resize the frame
                 final_frame = cv2.resize(crop_frame, (width,height))
-
                 try:
                     self.output_adapter.send(final_frame)
                     cv2.waitKey(1)
