@@ -12,12 +12,11 @@ Functions in CameraFiler:
 import threading
 import cv2
 
-from .filter import Filter
 from .io import outputAdapter
 from . import config
 
 
-class CameraFilter(Filter):
+class CameraFilter:
     """Filters a video stream.
 
         This filter rotates and cropps a video stream according to
@@ -31,13 +30,13 @@ class CameraFilter(Filter):
 
         Functions in the class:
             __init__(self) - Initialize variables
-            __del__(self) - Deletes the thread
             update(self, jaw_in, pitch_in, zoom_in) - Updates variables
             stop(self) - Stops the camera filter
             start(self) - Starts the camera filter
+            main(self) - Main loop of the camerafilter
     """
 
-    def __init__(self):
+    def __init__(self, pipeline):
         """Initializes the Camerafilter.
 
         Sets some default starting values
@@ -45,34 +44,36 @@ class CameraFilter(Filter):
         """
 
         super().__init__()
+        self.pipeline = pipeline
 
         # Set defaults
         self.jaw_in, self.pitch_in, self.zoom_in = 0,0,1
         self.stopped = False
 
         # Init thread
-        self.sem = threading.Semaphore()
-        self.thread = threading.Thread(target=self.start)
-        self.thread.start()
-        self.output_adapter = outputAdapter.outputAdapter()
+        self.semaphore = threading.Semaphore()
+        self.thread = threading.Thread(target=self.main)
 
-    def __del__(self):
-        """Deletes the thread if the CameraFilter is deleted."""
-        #self.thread._delete()
+        # Get ouptuptAdapter
+        self.output_adapter = outputAdapter.OutputAdapter()
 
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
-        self.sem.acquire()
+        self.semaphore.acquire()
         self.jaw_in = jaw_in
         self.pitch_in = pitch_in
         self.zoom_in = zoom_in
-        self.sem.release()
+        self.semaphore.release()
 
     def stop(self):
         """Stops the Camerafilter."""
         self.stopped=True
 
     def start(self):
+        """Starts the Camerafilter."""
+        self.thread.start()
+
+    def main(self):
         """The main function of the class.
 
         Takes input videostream input.
@@ -80,6 +81,9 @@ class CameraFilter(Filter):
         Outputs the proccesed videostream.
         """
         cap = cv2.VideoCapture(config.CONFIG['cam_input'])
+
+        if not cap.isOpened():
+            raise ValueError("No camera")
 
         cnt = 0  # Initialize frame counter
 
@@ -92,17 +96,16 @@ class CameraFilter(Filter):
         height = config.CONFIG['cam_height']
 
 
-        while(cap.isOpened() and not self.stopped):
+        while not self.stopped:
             ret, frame = cap.read()  # Capture frame by frames
             cnt += 1  # Counting the frames
 
             # Avoid problems when video finish
             if ret:
-                self.sem.acquire()
-                # Get rotation matrix
+                self.semaphore.acquire() # Get rotation matrix
                 matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
                                                 self.jaw_in, 1)
-                # Aply rotation matrix
+                # Apply rotation matrix
                 rotated_frame = cv2.warpAffine(frame, matrix,
                                                (w_frame, h_frame))
                 # Crop the frame
@@ -120,7 +123,8 @@ class CameraFilter(Filter):
                 except KeyboardInterrupt:
                     self.stopped = True
 
-                self.sem.release()
+
+                self.semaphore.release()
 
         cap.release()
 
