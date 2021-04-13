@@ -64,7 +64,7 @@ class ViewController():
     main_thread()
     """
 
-    def __init__(self, pipeline):
+    def __init__(self):
         """
         Input controller. Communicates with the auto pilot FixHawk and
         relays data from it.
@@ -75,9 +75,9 @@ class ViewController():
         as rotation around the y-axis, pitch around the x-axis and yaw
         around the z-axis.
         """
-        #Threading parameters
-        self.pipeline = pipeline 
-        self.thread = threading.Thread(target=self.main)
+        #Threading parameters, need pipeline in init
+        #self.pipeline = pipeline 
+        #self.thread = threading.Thread(target=self.main)
                 
         self.d_roll = 0
         self.d_pitch = 0
