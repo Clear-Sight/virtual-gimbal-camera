@@ -26,3 +26,11 @@ class Pipeline:
         self.camera_filter.start()
         self.view_controller.start()
         self.input_adapter.start()
+
+    def push_usr_msg(self, usr_msg):
+        """
+        Updates view_controller with the user message
+        from input_adapter to view_controller.
+        """
+        self.view_controller.update_server_input(
+            usr_msg["theta"], usr_msg["phi"], usr_msg["lock_on"])
