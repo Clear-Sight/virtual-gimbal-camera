@@ -1,8 +1,13 @@
 from .adapter import Adapter
+import threading
 
-class inputAdapter(Adapter):
-    def __init__(self):
-        pass
+class InputAdapter(Adapter):
+    def __init__(self, pipeline):
+        self.pipeline = pipeline 
+        self.thread = threading.Thread(target=self.main)
 
-    def format():
+    def start(self):
+        pass 
+
+    def main(self):
         pass 

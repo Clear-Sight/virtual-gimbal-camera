@@ -10,7 +10,7 @@ This main responsibility is to send a video stream from VGC to a revicer.
 
 """
 
-class outputAdapter(Adapter):
+class OutputAdapter(Adapter):
     """ Is given frames and sends them to the set domain """
     def __init__(self):
         self.context = zmq.Context()
