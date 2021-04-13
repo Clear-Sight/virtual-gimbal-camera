@@ -26,7 +26,7 @@ class InputAdapter(Adapter):
 
 
     def start(self):
-        pass
+        self.thread.start()
 
 
     def identifcation(self):
