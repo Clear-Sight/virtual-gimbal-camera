@@ -12,7 +12,7 @@ Functions in CameraFiler:
 import threading
 import cv2
 
-from .io import outputAdapter
+from .io import output_adapter
 from . import config
 
 
