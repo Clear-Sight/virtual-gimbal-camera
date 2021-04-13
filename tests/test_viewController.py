@@ -17,10 +17,10 @@ which executes all the different testfunctions.
 # Also, 9 arguments for function "plot" is necessary.
 import numpy as np
 import matplotlib.pyplot as plt
-import vgc.viewController as viewController
+from vgc.view_controller import ViewController
 #import threading
 
-vc = viewController.ViewController()
+vc = ViewController()
 
 SIZE = 200
 VIEW_SIZE = 50

@@ -1,7 +1,7 @@
 
-from .cameraFilter import CameraFilter 
-from .viewController import ViewController
-from .io.inputAdapter import InputAdapter
+from .camera_filter import CameraFilter
+from .view_controller import ViewController
+from .io.input_adapter import InputAdapter
 
 class Pipeline:
     """"
@@ -12,7 +12,7 @@ class Pipeline:
     start(self):
         Starts all the threads
 
-    
+
     """
 
     def __init__(self):
