@@ -75,10 +75,9 @@ class ViewController():
         as rotation around the y-axis, pitch around the x-axis and yaw
         around the z-axis.
         """
-        #Threading parameters, need pipeline in init
-        self.pipeline = pipeline 
-        #self.thread = threading.Thread(target=self.main)
-                
+        self.pipeline = pipeline
+        self.thread = threading.Thread(target=self.main)
+
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -110,12 +109,12 @@ class ViewController():
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
         self.phi_final = 0
         self.dist_from_center = 0
-        
+
     def start(self):
         """
         Start thread
         """
-        pass
+        self.thread.start()
 
 
     def main_thread(self):

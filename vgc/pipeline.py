@@ -26,3 +26,9 @@ class Pipeline:
         self.camera_filter.start()
         self.view_controller.start()
         self.input_adapter.start()
+
+
+    def set_cromping_point(self, phi, theta):
+        """" Sets the point for the filter to crop out """
+        # BUG: THIS NEED TO BE FIXED! dont know witch whan is on and zoom??? 
+        self.camera_filter.update(jaw_in=phi, pitch_in=theta, zoom_in=0)
