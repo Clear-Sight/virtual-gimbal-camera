@@ -18,9 +18,10 @@ which executes all the different testfunctions.
 import numpy as np
 import matplotlib.pyplot as plt
 from vgc.view_controller import ViewController
+from vgc.pipeline import Pipeline
 #import threading
 
-vc = ViewController()
+vc = Pipeline().view_controller
 
 SIZE = 200
 VIEW_SIZE = 50
