@@ -80,7 +80,6 @@ class ViewController():
         #self.thread = threading.Thread(target=self.main)
                 
         self.d_roll = 0
-        self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
         self.d_height = 0 # Height in meters above sea level
