@@ -47,7 +47,7 @@ class CameraFilter:
         self.pipeline = pipeline
 
         # Set defaults
-        self.jaw_in, self.pitch_in, self.zoom_in = 0,0,1
+        self.jaw_in, self.pitch_in, self.zoom_in = 0,0,4
         self.stopped = False
 
         # Init thread
@@ -60,9 +60,9 @@ class CameraFilter:
     def update(self, jaw_in, pitch_in, zoom_in):
         """Updates the cropping values of the CameraFilter."""
         self.semaphore.acquire()
-        self.jaw_in = jaw_in
-        self.pitch_in = pitch_in
-        self.zoom_in = zoom_in
+        self.jaw_in = jaw_in # 0 to 360
+        self.pitch_in = pitch_in # 0 to 180
+        self.zoom_in = zoom_in # 2 to inf?
         self.semaphore.release()
 
     def stop(self):
@@ -88,8 +88,8 @@ class CameraFilter:
         cnt = 0  # Initialize frame counter
 
         # Some characteristics from the original video
-        w_frame = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h_frame = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        frame_widht = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         # Getting width and height of output from config file
         width = config.CONFIG['cam_width']
@@ -103,20 +103,7 @@ class CameraFilter:
             # Avoid problems when video finish
             if ret:
                 self.semaphore.acquire() # Get rotation matrix
-                matrix = cv2.getRotationMatrix2D((w_frame/2, h_frame/2),
-                                                self.jaw_in, 1)
-                # Apply rotation matrix
-                rotated_frame = cv2.warpAffine(frame, matrix,
-                                               (w_frame, h_frame))
-                # Crop the frame
-                crop_frame = cv2.getRectSubPix(rotated_frame,
-                                               (int(width*self.zoom_in),
-                                                int(height*self.zoom_in)),
-                                               (w_frame/2, h_frame/2
-                                                - height*self.zoom_in/2
-                                                + self.pitch_in))
-                # Resize the frame
-                final_frame = cv2.resize(crop_frame, (width,height))
+                final_frame = self.handle_frame(frame, frame_widht, frame_height, width, height)
                 try:
                     self.output_adapter.send(final_frame)
                     cv2.waitKey(1)
@@ -129,3 +116,20 @@ class CameraFilter:
         cap.release()
 
         cv2.destroyAllWindows()
+
+    def handle_frame(self, frame, frame_width, frame_height, out_width, out_height ):
+        matrix = cv2.getRotationMatrix2D((frame_width/2, frame_height/2),
+                                        self.jaw_in, 1)
+        # Apply rotation matrix
+        rotated_frame = cv2.warpAffine(frame, matrix,
+                                        (frame_width, frame_height))
+        # Crop the frame
+        relative_pitch = (frame_height/2 - out_height/self.zoom_in) * self.pitch_in / 180 
+
+        crop_frame = cv2.getRectSubPix(rotated_frame,
+                                        (int(out_width/self.zoom_in),
+                                        int(out_height/self.zoom_in)),
+                                        (frame_width/2, frame_height/2
+                                        - relative_pitch))
+        # Resize the frame
+        return cv2.resize(crop_frame, (out_width,out_height))
