@@ -15,13 +15,13 @@ which executes all the different testfunctions.
 # pylint: disable=too-many-locals
 # Rather too many local variables than using magic numbers.
 # Also, 9 arguments for function "plot" is necessary.
-import sys
-sys.path.append('../')
 import numpy as np
 import matplotlib.pyplot as plt
-import vgc.viewController as viewController
+from vgc.view_controller import ViewController
+from vgc.pipeline import Pipeline
+#import threading
 
-vc = viewController.ViewController()
+vc = Pipeline().view_controller
 
 SIZE = 200
 VIEW_SIZE = 50
@@ -60,11 +60,11 @@ def test_main():
 
     # Test if height doesn't change when entering an invalid value
     for test_height in [-10, 10, 9999, 1000]:
-        assert testing_inappropriate_height(test_height)
+        assert get_inappropriate_height(test_height)
 
     #Test so that theta can not be set to an invalid value.
     for test_theta in [20, 30, -10, 110]:
-        assert testing_inappropriate_theta(test_theta)
+        assert get_inappropriate_theta(test_theta)
 
     print("Passed all tests")
 
@@ -101,7 +101,7 @@ def get_camera_angle_when_roll(roll):
     vc.main()
     return (vc.theta_final, vc.phi_final)
 
-def testing_inappropriate_theta(theta):
+def get_inappropriate_theta(theta):
     """
     This function tests that different
     thetas and checks if they are set correctly.
@@ -111,7 +111,7 @@ def testing_inappropriate_theta(theta):
     vc.main()
     return vc.theta_in < 90 and vc.theta_in >= 0
 
-def testing_inappropriate_height(height):
+def get_inappropriate_height(height):
     """
     This function tests different heights
     and checks if they are set correctly.
@@ -165,21 +165,21 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     rot_matrix = vc.rotation_matrix(roll, yaw, pitch)
     rot_matrix_inv = rot_matrix.transpose()
 
-    # Figur
+    # Figure
     fig = plt.figure()
     ax = fig.gca(projection='3d', xlim=(-1 * SIZE, SIZE), ylim=(-1 * SIZE, SIZE),
     zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
     ax.set_ylabel('Drönarens riktning (y)')
     ax.set_xlabel('Drönarens sidor (x)')
 
-    # Plotta kamerans sfär
+    # Plot camera sphere
     u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
     x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
     y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
     z = -(VIEW_SIZE)*np.cos(v)
     ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
 
-    # Plotta marken
+    # Plot ground
     point = np.array([[0], [0], [-height]])
     point = rot_matrix_inv.dot(point)
     normal = np.array([[0], [0], [1]])
@@ -192,28 +192,27 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
     ax.plot_surface(xx, yy, z, alpha = 0.5)
 
-    # Plotta sökt koordinat
+    # Plot target coordinate
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
     ax.scatter(p_3dcoordinate.item(0), p_3dcoordinate.item(1),
     p_3dcoordinate.item(2), marker = '^')
 
-    # plotta drönarens riktning
+    # Plot drone direction
     drone_dir = vc.angular_to_spherical(90, 0)
 
     ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1),
     drone_dir.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
-    # Norr
+    # Plot North
     north = rot_matrix_inv.dot(drone_dir)
     ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
     VIEW_SIZE * north.item(2), marker='o')
 
-    # Kamerans sikte
+    # Plot camera angle
     theta_final, phi_final = vc.theta_final, vc.phi_final
     cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
     ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0),
     VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
     marker = 'x')
     plt.show()
-    

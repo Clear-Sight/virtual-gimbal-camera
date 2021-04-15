@@ -1,15 +1,18 @@
-import cv2
-from . import primes
-from . import buffer
-from . import io
+from .config import CONFIG
+from .pipeline import Pipeline
 
-__version__ = "0.1.0"
+"""
+This is the main file for virtual-gimbal-camera.
+This file is the root of the project.
+"""
+
+__version__ = "1.0.0"
 
 
 def main():
-    print(primes.primes(100))
-
-
+    pipeline = Pipeline()
+    pipeline.start()
 
 if __name__ == '__main__':
-    main()
+    if CONFIG['debug']:
+        main()
