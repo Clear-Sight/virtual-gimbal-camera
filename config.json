@@ -1,10 +1,9 @@
 {
-"domain": "localhost",
+"input_domain": "localhost:24474",
+"output_domain": "localhost:7777",
 "debug": true,
 "local": false,
 "cam_width": 640,
 "cam_height": 480,
-"cam_input": 0,
-"videostream_port": 7777,
-"user_input_port": 7776
+"cam_input": 0
 }

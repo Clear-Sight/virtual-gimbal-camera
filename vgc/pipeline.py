@@ -5,7 +5,9 @@ from .io.input_adapter import InputAdapter
 
 class Pipeline:
     """"
-    Cross thread messaging pipeline
+    Cross thread messaging pipeline.
+    Threads communicates by calling pipeline's
+    class functions
 
     __init__(self):
         Initializes the different modules
@@ -31,7 +33,7 @@ class Pipeline:
     def set_cromping_point(self, phi, theta):
         """" Sets the point for the filter to crop out """
         # BUG: THIS NEED TO BE FIXED!  what should zoom be???
-        self.camera_filter.update(jaw_in=theta, pitch_in=phi, zoom_in=0)
+        self.camera_filter.update(jaw_in=theta, pitch_in=phi, zoom_in=2)
 
 
     def push_usr_msg(self, usr_msg):

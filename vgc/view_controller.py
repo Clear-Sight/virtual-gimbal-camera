@@ -75,10 +75,8 @@ class ViewController():
         as rotation around the y-axis, pitch around the x-axis and yaw
         around the z-axis.
         """
-<<<<<<< HEAD
-=======
         #Threading parameters, need pipeline in init
->>>>>>> development
+
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
 
@@ -109,14 +107,14 @@ class ViewController():
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
-<<<<<<< HEAD
+
         self.phi_final = 0
         self.dist_from_center = 0
-=======
+
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
->>>>>>> development
+
 
     def start(self):
         """
