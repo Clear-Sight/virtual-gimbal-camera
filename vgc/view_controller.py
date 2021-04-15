@@ -138,7 +138,7 @@ class ViewController():
             self.d_coordinate = (lon, lat)
             self.new_fixhawk_values = True
 
-    def update_server_input(self, theta = 0, phi = 0, zoom_in = 2, lock_on = False):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2,):
         """
         Updates data from user interface
         SETTER
