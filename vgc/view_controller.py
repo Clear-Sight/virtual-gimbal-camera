@@ -78,7 +78,7 @@ class ViewController():
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
         #self.thread = threading.Thread(target=self.main)
-                
+
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -109,7 +109,7 @@ class ViewController():
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
-      
+
     def start(self):
         """
         Start thread
