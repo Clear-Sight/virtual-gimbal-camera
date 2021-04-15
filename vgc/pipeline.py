@@ -32,3 +32,12 @@ class Pipeline:
         """" Sets the point for the filter to crop out """
         # BUG: THIS NEED TO BE FIXED!  what should zoom be???
         self.camera_filter.update(jaw_in=theta, pitch_in=phi, zoom_in=0)
+
+
+    def push_usr_msg(self, usr_msg):
+        """
+        Updates view_controller with the user message
+        from input_adapter to view_controller.
+        """
+        self.view_controller.update_server_input(
+            usr_msg["compass"], usr_msg["angle"], usr_msg["lock_on"])

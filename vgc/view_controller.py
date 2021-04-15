@@ -11,7 +11,7 @@ Threading:
 pipepline
 thread
 
-INPUT from inputRegulator.py
+INPUT from input_adapter.py
 (There is a setter to this.)
 theta_in
 phi_in
@@ -75,6 +75,10 @@ class ViewController():
         as rotation around the y-axis, pitch around the x-axis and yaw
         around the z-axis.
         """
+<<<<<<< HEAD
+=======
+        #Threading parameters, need pipeline in init
+>>>>>>> development
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
 
@@ -92,13 +96,11 @@ class ViewController():
         self.lock_on = False
         self.init_lock_on = False
 
-        # VARIABLES FROM CONFIG FILE
-        self.image_radius = 1080 # Needs to be fetched from file
-
         # INTERNAL VARIABLES
         self.new_fixhawk_values = False
         self.new_server_values = False
         self.aim_coordinate = (0, 0) # Saved coordinate to center focus on
+        self.phi_final = 0
         self.theta_final = 0 # Adjusted angle theta
 
         # OUTPUT VARIABLES
@@ -107,8 +109,14 @@ class ViewController():
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
+<<<<<<< HEAD
         self.phi_final = 0
         self.dist_from_center = 0
+=======
+        self.camera_yaw = 0
+        self.camera_pitch = 0
+        self.camera_zoom = 2
+>>>>>>> development
 
     def start(self):
         """
@@ -138,7 +146,7 @@ class ViewController():
             self.d_coordinate = (lon, lat)
             self.new_fixhawk_values = True
 
-    def update_server_input(self, theta = 0, phi = 0, lock_on = False):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2,):
         """
         Updates data from user interface
         SETTER
@@ -157,6 +165,8 @@ class ViewController():
             if(lock_on is True and self.lock_on is False):
                 self.init_lock_on = True
             self.lock_on = lock_on
+            if(zoom_in >= 2 and zoom_in <= 50):
+                self.camera_zoom = zoom_in
             self.new_server_values = True
 
     def coordinate_to_point(self, coord1, coord2, height):
@@ -231,24 +241,21 @@ class ViewController():
                     self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(theta_temp, phi_temp)
-                self.dist_from_center = self.image_radius * \
-                np.sin(self.theta_final)
+                self.camera_pitch = np.sin(self.theta_final)
+                self.camera_yaw = self.phi_final
                 self.new_fixhawk_values = False
                 self.new_server_values = False
             else:
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(self.theta_in, self.phi_in)
-                self.dist_from_center = self.image_radius * \
-                np.sin(self.theta_final)
+                self.camera_pitch = np.sin(self.theta_final)
+                self.camera_yaw = self.phi_final
                 self.new_server_values = False
                 self.new_fixhawk_values = False
-
-    def get_image_point(self):
-        """
-        Returns our phi_final and dist_from_center. This can be used by
-        cameraFilter to point out where we should look.
-        """
-        return self.phi_final, self.dist_from_center
+            #self.pipeline.set_cropping_point(
+            #    self.camera_yaw,
+            #    self.camera_pitch,
+            #    self.camera_zoom)
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
