@@ -8,6 +8,11 @@ import uuid
 import requests
 
 class InputAdapter(Adapter):
+    """
+    Fetches the user input from server
+    and pushes it over pipeline to view_controller
+    """
+
     def __init__(self, pipeline):
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
@@ -16,6 +21,7 @@ class InputAdapter(Adapter):
         self.cached_usr_msg = {}
 
     def start(self):
+        """ thread starting funciton """
         self.thread.start()
 
 
