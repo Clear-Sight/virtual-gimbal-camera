@@ -12,7 +12,7 @@ class InputAdapter(Adapter):
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
         self.port = "24474"
-        self.usr_msg = {}
+        self.usr_msg = {"compass":0.0, "angle":90.0, "lock_on":False}
         self.cached_usr_msg = {}
 
     def start(self):
@@ -36,7 +36,6 @@ class InputAdapter(Adapter):
         """ Continuously checks if a user message was received """
         while True:
             self.usr_msg = self.get_usr_input()
-            self.usr_msg["lock_on"] = False
             if self.usr_msg != self.cached_usr_msg:
                 self.cached_usr_msg = self.usr_msg
                 self.push()
