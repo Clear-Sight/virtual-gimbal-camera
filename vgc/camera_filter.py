@@ -5,7 +5,7 @@ Class CameraFilter - Crops, rotates and scales a videostream
 Functions in CameraFiler:
     __init__(self) - Initialize variables
     __del__(self) - Deletes the thread
-    update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+    update(self, camera_yaw , camera_pitch, camera_zoom) - Updates variables
     stop(self) - Stops the camera filter
     start(self) - Starts the camera filter
 """
@@ -30,7 +30,7 @@ class CameraFilter:
 
         Functions in the class:
             __init__(self) - Initialize variables
-            update(self, jaw_in, pitch_in, zoom_in) - Updates variables
+            update(self, camera_yaw , camera_, camera_zoom) - Updates variables
             stop(self) - Stops the camera filter
             start(self) - Starts the camera filter
             main(self) - Main loop of the camerafilter
@@ -47,7 +47,7 @@ class CameraFilter:
         self.pipeline = pipeline
 
         # Set defaults
-        self.jaw_in, self.pitch_in, self.zoom_in = 0,0,4
+        self.camera_yaw , self.camera_pitch, self.camera_zoom = 0,0,4
         self.stopped = False
 
         # Init thread
@@ -57,12 +57,12 @@ class CameraFilter:
         # Get ouptuptAdapter
         self.output_adapter = output_adapter.OutputAdapter()
 
-    def update(self, jaw_in, pitch_in, zoom_in):
+    def update(self, camera_yaw , camera_pitch, camera_zoom):
         """Updates the cropping values of the CameraFilter."""
         self.semaphore.acquire()
-        self.jaw_in = jaw_in # 0 to 360
-        self.pitch_in = pitch_in # 0 to 180
-        self.zoom_in = zoom_in # 2 to inf?
+        self.camera_yaw  = camera_yaw  # 0 to 360
+        self.camera_pitch = camera_pitch # 0 to 1
+        self.camera_zoom = camera_zoom # 2 to inf?
         self.semaphore.release()
 
     def stop(self):
@@ -77,7 +77,7 @@ class CameraFilter:
         """The main function of the class.
 
         Takes input videostream input.
-        Crops and rotates according to jaw_in, pitch_in and zoom_in.
+        Crops and rotates according to camera_yaw , camera_pitch and camera_zoom.
         Outputs the proccesed videostream.
         """
         cap = cv2.VideoCapture(config.CONFIG['cam_input'])
@@ -109,8 +109,6 @@ class CameraFilter:
                     cv2.waitKey(1)
                 except KeyboardInterrupt:
                     self.stopped = True
-
-
                 self.semaphore.release()
 
         cap.release()
@@ -119,16 +117,16 @@ class CameraFilter:
 
     def handle_frame(self, frame, frame_width, frame_height, out_width, out_height ):
         matrix = cv2.getRotationMatrix2D((frame_width/2, frame_height/2),
-                                        self.jaw_in, 1)
+                                        self.camera_yaw , 1)
         # Apply rotation matrix
         rotated_frame = cv2.warpAffine(frame, matrix,
                                         (frame_width, frame_height))
         # Crop the frame
-        relative_pitch = (frame_height/2 - out_height/self.zoom_in) * self.pitch_in / 180 
+        relative_pitch = (frame_height/2 - out_height/self.camera_zoom) * self.camera_pitch 
 
         crop_frame = cv2.getRectSubPix(rotated_frame,
-                                        (int(out_width/self.zoom_in),
-                                        int(out_height/self.zoom_in)),
+                                        (int(out_width/self.camera_zoom),
+                                        int(out_height/self.camera_zoom)),
                                         (frame_width/2, frame_height/2
                                         - relative_pitch))
         # Resize the frame
