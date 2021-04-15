@@ -11,7 +11,7 @@ Threading:
 pipepline
 thread
 
-INPUT from inputRegulator.py
+INPUT from input_adapter.py
 (There is a setter to this.)
 theta_in
 phi_in
@@ -77,7 +77,7 @@ class ViewController():
         """
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
-        #self.thread = threading.Thread(target=self.main)
+        self.thread = threading.Thread(target=self.main)
 
         self.d_roll = 0
         self.d_pitch = 0

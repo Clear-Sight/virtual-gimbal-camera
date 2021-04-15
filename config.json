@@ -4,5 +4,7 @@
 "local": false,
 "cam_width": 640,
 "cam_height": 480,
-"cam_input": 0
+"cam_input": 0,
+"videostream_port": 7777,
+"user_input_port": 7776
 }

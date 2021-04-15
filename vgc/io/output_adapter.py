@@ -15,7 +15,7 @@ class OutputAdapter(Adapter):
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect(f'tcp://{CONFIG["domain"]}:7777')
+        self.socket.connect(f'tcp://{CONFIG["domain"]}:{CONFIG["videostream_port"]}')
 
     def send(self, frame):
         """ sends a frame to the set domain in CONFIG """
