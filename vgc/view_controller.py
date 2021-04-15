@@ -244,10 +244,10 @@ class ViewController():
                 self.camera_yaw = self.phi_final
                 self.new_server_values = False
                 self.new_fixhawk_values = False
-            self.pipeline.set_cropping_point(
-                self.camera_yaw,
-                self.camera_pitch,
-                self.camera_zoom)
+            #self.pipeline.set_cropping_point(
+            #    self.camera_yaw,
+            #    self.camera_pitch,
+            #    self.camera_zoom)
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
