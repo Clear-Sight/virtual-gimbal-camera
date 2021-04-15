@@ -15,9 +15,11 @@ which executes all the different testfunctions.
 # pylint: disable=too-many-locals
 # Rather too many local variables than using magic numbers.
 # Also, 9 arguments for function "plot" is necessary.
+import sys
+sys.path.append('../')
 import numpy as np
 import matplotlib.pyplot as plt
-import viewController
+import vgc.viewController as viewController
 
 vc = viewController.ViewController()
 
