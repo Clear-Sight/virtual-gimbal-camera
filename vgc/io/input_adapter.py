@@ -5,48 +5,25 @@ import zmq
 import json
 import time
 import uuid
+import requests
 
 class InputAdapter(Adapter):
     def __init__(self, pipeline):
         self.pipeline = pipeline
-        self.identifcation()
         self.thread = threading.Thread(target=self.main)
-        self.host = "*"
-        self.port = "7777"
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.SUB)
-        self.socket.bind(f"tcp://{self.host}:{self.port}")
-        self.socket.subscribe("")
+        self.port = "24474"
+        self.usr_msg = {}
         self.cached_usr_msg = {}
-        self.usr_msg = {
-                "phi":0.0,
-                "theta":0.0,
-                "lock_on":False
-            } # default
-
 
     def start(self):
         self.thread.start()
 
 
-    def identifcation(self):
-        """
-        Sends a message to the server
-        for IP identifcation of the drone.
-        """
-        self.domain = CONFIG["domain"]
-        port = "7776"
-        context = zmq.Context()
-        socket = context.socket(zmq.PUB)
-        socket.connect(f"tcp://{self.domain}:{port}")
-        time.sleep(1)
-        # sends MAC address to identify drone
-        socket.send_string(f"drone-connected:{str(hex(uuid.getnode()))}")
-        return True
-
-    def recive(self):
-        """ Receives a JSON user message """
-        return self.socket.recv_json()
+    def get_usr_input(self):
+        """ Fetch user input from web server via GET request. """
+        r = requests.get(
+        f'http://{CONFIG["domain"]}:{self.port}/drone/user/fetch')
+        return r.json()
 
     def push(self):
         """
@@ -58,7 +35,9 @@ class InputAdapter(Adapter):
     def main(self):
         """ Continuously checks if a user message was received """
         while True:
-            self.usr_msg = self.recive()
+            self.usr_msg = self.get_usr_input()
+            self.usr_msg["lock_on"] = False
             if self.usr_msg != self.cached_usr_msg:
                 self.cached_usr_msg = self.usr_msg
                 self.push()
+            time.sleep(1) # maybe should be something better
