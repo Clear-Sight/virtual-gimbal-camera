@@ -14,5 +14,4 @@ def main():
     pipeline.start()
 
 if __name__ == '__main__':
-    if CONFIG['debug']:
-        main()
+    main()
