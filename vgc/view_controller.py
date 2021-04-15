@@ -76,7 +76,7 @@ class ViewController():
         around the z-axis.
         """
         #Threading parameters, need pipeline in init
-        self.pipeline = pipeline 
+        self.pipeline = pipeline
         #self.thread = threading.Thread(target=self.main)
                 
         self.d_roll = 0
@@ -244,7 +244,7 @@ class ViewController():
                 self.camera_yaw = self.phi_final
                 self.new_server_values = False
                 self.new_fixhawk_values = False
-            self.pipeline.update_camera_filter(
+            self.pipeline.set_cropping_point(
                 self.camera_yaw,
                 self.camera_pitch,
                 self.camera_zoom)
