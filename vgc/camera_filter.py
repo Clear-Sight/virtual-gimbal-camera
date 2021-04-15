@@ -43,7 +43,7 @@ class CameraFilter:
         Initializes and starts the CameraFilter thread.
         """
 
-        super().__init__()
+        #super().__init__() # dose not seem to be needed any more 
         self.pipeline = pipeline
 
         # Set defaults
