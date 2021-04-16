@@ -240,7 +240,7 @@ class ViewController():
             else:
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(self.theta_in, self.phi_in)
-                self.camera_pitch = np.sin(self.theta_final)
+                self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
                 self.camera_yaw = self.phi_final
                 self.new_server_values = False
                 self.new_fixhawk_values = False
