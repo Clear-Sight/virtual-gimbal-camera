@@ -1,5 +1,6 @@
 {
-"domain": "localhost",
+"input_domain": "localhost:24474",
+"output_domain": "localhost:7777",
 "debug": true,
 "local": false,
 "cam_width": 640,

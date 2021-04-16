@@ -1,7 +1,6 @@
 import base64
 import cv2
 import zmq
-from .adapter import Adapter
 from ..config import CONFIG
 
 """
@@ -10,12 +9,12 @@ This main responsibility is to send a video stream from VGC to a revicer.
 
 """
 
-class OutputAdapter(Adapter):
+class OutputAdapter:
     """ Is given frames and sends them to the set domain """
     def __init__(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect(f'tcp://{CONFIG["domain"]}:7777')
+        self.socket.connect(f'tcp://{CONFIG["output_domain"]}')
 
     def send(self, frame):
         """ sends a frame to the set domain in CONFIG """

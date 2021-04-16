@@ -5,7 +5,9 @@ from .io.input_adapter import InputAdapter
 
 class Pipeline:
     """"
-    Cross thread messaging pipeline
+    Cross thread messaging pipeline.
+    Threads communicates by calling pipeline's
+    class functions
 
     __init__(self):
         Initializes the different modules
@@ -26,3 +28,18 @@ class Pipeline:
         self.camera_filter.start()
         self.view_controller.start()
         self.input_adapter.start()
+
+
+    def set_cropping(self, phi, theta, zoom=2):
+        """" Sets the point for the filter to crop out """
+        # BUG: THIS NEED TO BE FIXED!  what should zoom be???
+        self.camera_filter.update(yaw_in=theta, pitch_in=phi, zoom_in=zoom)
+
+
+    def push_usr_msg(self, usr_msg):
+        """
+        Updates view_controller with the user message
+        from input_adapter to view_controller.
+        """
+        self.view_controller.update_server_input(
+            usr_msg["compass"], usr_msg["angle"], usr_msg["lock_on"])

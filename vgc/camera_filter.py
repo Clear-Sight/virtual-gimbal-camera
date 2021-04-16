@@ -48,7 +48,7 @@ class CameraFilter:
         Sets some default starting values
         Initializes and starts the CameraFilter thread.
         """
-        super().__init__()
+
         self.pipeline = pipeline
 
         # Init thread
@@ -63,7 +63,9 @@ class CameraFilter:
         # Get ouptuptAdapter
         self.output_adapter = output_adapter.OutputAdapter()
 
+
     def update(self, camera_yaw , camera_pitch, camera_zoom):
+
         """Updates the cropping values of the CameraFilter."""
 
         if not 0 <= camera_yaw <= 360:
@@ -76,9 +78,11 @@ class CameraFilter:
             raise ValueError("camera_zoom out of bounds ( >= 2)")
 
         self.semaphore.acquire()
+
         self.camera_yaw  = camera_yaw
         self.camera_pitch = camera_pitch
         self.camera_zoom = camera_zoom
+
         self.semaphore.release()
 
     def stop(self):
@@ -102,6 +106,7 @@ class CameraFilter:
         Takes input videostream input.
         Crops and rotates according to camera_yaw ,
         camera_pitch and camera_zoom.
+
         Outputs the proccesed videostream.
         """
         cap = cv2.VideoCapture(self.camera_input if self.camera_input
@@ -126,6 +131,7 @@ class CameraFilter:
             cnt += 1  # Counting the frames
 
             # Avoid problems when video finish
+
             if not ret:
                 break
 
@@ -140,6 +146,7 @@ class CameraFilter:
             self.semaphore.release()
 
             cap.release()
+
 
         cv2.destroyAllWindows()
 
