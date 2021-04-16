@@ -225,35 +225,38 @@ class ViewController():
         looking. Then you can call the getter-function to recieve
         the updated values.
         """
-        if self.new_fixhawk_values or self.new_server_values:
-            self.new_fixhawk_values = True
-            self.new_server_values = True
-            if self.lock_on:
-                if self.init_lock_on:
-                    self.aim_coordinate = self.point_to_coordinate(
-                        self.theta_in, self.phi_in,
-                        self.d_height, self.d_coordinate)
-                    self.init_lock_on = False
+        while True:
 
-                (theta_temp, phi_temp) = self.coordinate_to_point(
-                    self.d_coordinate, self.aim_coordinate, self.d_height)
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(theta_temp, phi_temp)
-                self.camera_pitch = np.sin(self.theta_final)
-                self.camera_yaw = self.phi_final
-                self.new_fixhawk_values = False
-                self.new_server_values = False
-            else:
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(self.theta_in, self.phi_in)
-                self.camera_pitch = np.sin(self.theta_final)
-                self.camera_yaw = self.phi_final
-                self.new_server_values = False
-                self.new_fixhawk_values = False
-            #self.pipeline.set_cropping_point(
-            #    self.camera_yaw,
-            #    self.camera_pitch,
-            #    self.camera_zoom)
+            print(f"view controller {self.phi_in}")
+            if self.new_fixhawk_values or self.new_server_values:
+                self.new_fixhawk_values = True
+                self.new_server_values = True
+                if self.lock_on:
+                    if self.init_lock_on:
+                        self.aim_coordinate = self.point_to_coordinate(
+                            self.theta_in, self.phi_in,
+                            self.d_height, self.d_coordinate)
+                        self.init_lock_on = False
+
+                    (theta_temp, phi_temp) = self.coordinate_to_point(
+                        self.d_coordinate, self.aim_coordinate, self.d_height)
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(theta_temp, phi_temp)
+                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_fixhawk_values = False
+                    self.new_server_values = False
+                else:
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(self.theta_in, self.phi_in)
+                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_server_values = False
+                    self.new_fixhawk_values = False
+                self.pipeline.set_cropping(
+                    self.camera_yaw,
+                    self.camera_pitch,
+                    self.camera_zoom)
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
