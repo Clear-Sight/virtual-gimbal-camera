@@ -76,6 +76,7 @@ class ViewController():
         around the z-axis.
         """
         #Threading parameters, need pipeline in init
+
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
 
@@ -106,15 +107,20 @@ class ViewController():
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
+
+        self.phi_final = 0
+        self.dist_from_center = 0
+
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
+
 
     def start(self):
         """
         Start thread
         """
-        pass
+        self.thread.start()
 
 
     def main_thread(self):
