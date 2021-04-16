@@ -251,10 +251,13 @@ class ViewController():
                     self.camera_yaw = self.phi_final
                     self.new_server_values = False
                     self.new_fixhawk_values = False
-                self.pipeline.set_cropping(
-                    self.camera_yaw,
-                    self.camera_pitch,
-                    self.camera_zoom)
+
+                #BUG: calls pipeline during testing with out of bounds variables
+                # camera_pitch was negative
+                #self.pipeline.set_cropping(
+                    #self.camera_yaw,
+                    #self.camera_pitch,
+                    #self.camera_zoom)
                 if not is_threading:
                     break
 
