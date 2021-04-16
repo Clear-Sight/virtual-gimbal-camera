@@ -78,7 +78,7 @@ class ViewController():
         #Threading parameters, need pipeline in init
 
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main)
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
 
         self.d_roll = 0
         self.d_pitch = 0
@@ -217,7 +217,7 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-    def main(self):
+    def main(self, is_threading=False):
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and
@@ -255,6 +255,8 @@ class ViewController():
                     self.camera_yaw,
                     self.camera_pitch,
                     self.camera_zoom)
+                if not is_threading:
+                    break
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
