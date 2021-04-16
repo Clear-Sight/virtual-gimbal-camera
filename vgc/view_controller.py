@@ -226,8 +226,6 @@ class ViewController():
         the updated values.
         """
         while True:
-
-            print(f"view controller {self.phi_in}")
             if self.new_fixhawk_values or self.new_server_values:
                 self.new_fixhawk_values = True
                 self.new_server_values = True
