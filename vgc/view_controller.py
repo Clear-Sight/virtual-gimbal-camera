@@ -78,7 +78,7 @@ class ViewController():
         #Threading parameters, need pipeline in init
 
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main)
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
 
         self.d_roll = 0
         self.d_pitch = 0
@@ -217,7 +217,7 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-    def main(self):
+    def main(self, is_threading=False):
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and
@@ -225,35 +225,38 @@ class ViewController():
         looking. Then you can call the getter-function to recieve
         the updated values.
         """
-        if self.new_fixhawk_values or self.new_server_values:
-            self.new_fixhawk_values = True
-            self.new_server_values = True
-            if self.lock_on:
-                if self.init_lock_on:
-                    self.aim_coordinate = self.point_to_coordinate(
-                        self.theta_in, self.phi_in,
-                        self.d_height, self.d_coordinate)
-                    self.init_lock_on = False
+        while True:
+            if self.new_fixhawk_values or self.new_server_values:
+                self.new_fixhawk_values = True
+                self.new_server_values = True
+                if self.lock_on:
+                    if self.init_lock_on:
+                        self.aim_coordinate = self.point_to_coordinate(
+                            self.theta_in, self.phi_in,
+                            self.d_height, self.d_coordinate)
+                        self.init_lock_on = False
 
-                (theta_temp, phi_temp) = self.coordinate_to_point(
-                    self.d_coordinate, self.aim_coordinate, self.d_height)
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(theta_temp, phi_temp)
-                self.camera_pitch = np.sin(self.theta_final)
-                self.camera_yaw = self.phi_final
-                self.new_fixhawk_values = False
-                self.new_server_values = False
-            else:
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(self.theta_in, self.phi_in)
-                self.camera_pitch = np.sin(self.theta_final)
-                self.camera_yaw = self.phi_final
-                self.new_server_values = False
-                self.new_fixhawk_values = False
-            #self.pipeline.set_cropping_point(
-            #    self.camera_yaw,
-            #    self.camera_pitch,
-            #    self.camera_zoom)
+                    (theta_temp, phi_temp) = self.coordinate_to_point(
+                        self.d_coordinate, self.aim_coordinate, self.d_height)
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(theta_temp, phi_temp)
+                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_fixhawk_values = False
+                    self.new_server_values = False
+                else:
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(self.theta_in, self.phi_in)
+                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_server_values = False
+                    self.new_fixhawk_values = False
+                self.pipeline.set_cropping(
+                    self.camera_yaw,
+                    self.camera_pitch,
+                    self.camera_zoom)
+                if not is_threading:
+                    break
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
