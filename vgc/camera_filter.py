@@ -88,7 +88,7 @@ class CameraFilter:
         cnt = 0  # Initialize frame counter
 
         # Some characteristics from the original video
-        frame_widht = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         # Getting width and height of output from config file
@@ -103,7 +103,7 @@ class CameraFilter:
             # Avoid problems when video finish
             if ret:
                 self.semaphore.acquire() # Get rotation matrix
-                final_frame = self.handle_frame(frame, frame_widht, frame_height, width, height)
+                final_frame = self.handle_frame(frame, frame_width, frame_height, width, height)
                 try:
                     self.output_adapter.send(final_frame)
                     cv2.waitKey(1)
@@ -111,7 +111,7 @@ class CameraFilter:
                     self.stopped = True
                 self.semaphore.release()
 
-        cap.release()
+            cap.release()
 
         cv2.destroyAllWindows()
 
@@ -122,7 +122,7 @@ class CameraFilter:
         rotated_frame = cv2.warpAffine(frame, matrix,
                                         (frame_width, frame_height))
         # Crop the frame
-        relative_pitch = (frame_height/2 - out_height/self.camera_zoom) * self.camera_pitch 
+        relative_pitch = (frame_height/2 - (out_height/2)/self.camera_zoom) * self.camera_pitch 
 
         crop_frame = cv2.getRectSubPix(rotated_frame,
                                         (int(out_width/self.camera_zoom),
