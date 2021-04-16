@@ -30,10 +30,10 @@ class Pipeline:
         self.input_adapter.start()
 
 
-    def set_cromping_point(self, phi, theta):
+    def set_cromping(self, phi, theta):
         """" Sets the point for the filter to crop out """
         # BUG: THIS NEED TO BE FIXED!  what should zoom be???
-        self.camera_filter.update(jaw_in=theta, pitch_in=phi, zoom_in=2)
+        self.camera_filter.update(yaw_in=theta, pitch_in=phi, zoom_in=2)
 
 
     def push_usr_msg(self, usr_msg):
