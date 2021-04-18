@@ -254,10 +254,10 @@ class ViewController():
 
                 #BUG: calls pipeline during testing with out of bounds variables
                 # camera_pitch was negative
-                #self.pipeline.set_cropping(
-                    #self.camera_yaw,
-                    #self.camera_pitch,
-                    #self.camera_zoom)
+                self.pipeline.set_cropping(
+                    self.camera_yaw,
+                    self.camera_pitch,
+                    self.camera_zoom)
                 if not is_threading:
                     break
 
