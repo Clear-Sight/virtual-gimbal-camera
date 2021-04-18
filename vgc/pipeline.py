@@ -32,6 +32,7 @@ class Pipeline:
 
     def set_cropping(self, camera_yaw, camera_pitch, camera_zoom=2):
         """" Sets the point for the filter to crop out """
+        print(f"set cropping: yaw {camera_yaw}, pitch {camera_pitch}, zoom {camera_zoom}")
         self.camera_filter.update(camera_yaw=camera_yaw, camera_pitch=camera_pitch, camera_zoom=camera_zoom)
 
 
@@ -40,5 +41,6 @@ class Pipeline:
         Updates view_controller with the user message
         from input_adapter to view_controller.
         """
+        print(usr_msg)
         self.view_controller.update_server_input(
             usr_msg["angle"], usr_msg["compass"], usr_msg["lock_on"])
