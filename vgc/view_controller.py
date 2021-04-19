@@ -251,13 +251,21 @@ class ViewController():
                 self.camera_roll = self.d_roll
                 if not debug:
                     self.pipeline.set_cropping(
-                        self.camera_yaw, 
+                        self.camera_yaw,
                         self.camera_pitch,
                         self.camera_roll,
                         self.camera_zoom)
             if not is_threading:
                 break
 
+                #BUG: calls pipeline during testing with out of bounds variables
+                # camera_pitch was negative
+                self.pipeline.set_cropping(
+                    self.camera_yaw,
+                    self.camera_pitch,
+                    self.camera_zoom)
+                if not is_threading:
+                    break
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
