@@ -31,3 +31,4 @@ wrapt==1.12.1
 zmq==0.0.0
 future==0.18.2
 pymavlink==2.4.14
+requests==2.25.1

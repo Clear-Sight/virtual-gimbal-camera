@@ -11,7 +11,7 @@ Threading:
 pipepline
 thread
 
-INPUT from inputRegulator.py
+INPUT from input_adapter.py
 (There is a setter to this.)
 theta_in
 phi_in
@@ -76,9 +76,10 @@ class ViewController():
         around the z-axis.
         """
         #Threading parameters, need pipeline in init
+
         self.pipeline = pipeline
-        #self.thread = threading.Thread(target=self.main)
-                
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
+
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -106,15 +107,20 @@ class ViewController():
         # angle and the drone has yawed right by 30 degrees, our phi_final
         # would be -30 degrees and
         # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
+
+        self.phi_final = 0
+        self.dist_from_center = 0
+
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
-      
+
+
     def start(self):
         """
         Start thread
         """
-        pass
+        self.thread.start()
 
 
     def main_thread(self):
@@ -138,7 +144,7 @@ class ViewController():
             self.d_coordinate = (lon, lat)
             self.new_fixhawk_values = True
 
-    def update_server_input(self, theta = 0, phi = 0, zoom_in = 2, lock_on = False):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2,):
         """
         Updates data from user interface
         SETTER
@@ -211,7 +217,11 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
+<<<<<<< HEAD
     def main(self, is_threading=False, debug=False):
+=======
+    def main(self, is_threading=False):
+>>>>>>> origin/development
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and
@@ -241,6 +251,7 @@ class ViewController():
                 else:
                     self.theta_final, self.phi_final = \
                     self.adjust_aim(self.theta_in, self.phi_in)
+<<<<<<< HEAD
                     self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
                     self.camera_yaw = self.phi_final
                     self.new_server_values = False
@@ -254,6 +265,21 @@ class ViewController():
                 print("TESTING")
             if not is_threading:
                 break
+=======
+                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_server_values = False
+                    self.new_fixhawk_values = False
+
+                #BUG: calls pipeline during testing with out of bounds variables
+                # camera_pitch was negative
+                #self.pipeline.set_cropping(
+                    #self.camera_yaw,
+                    #self.camera_pitch,
+                    #self.camera_zoom)
+                if not is_threading:
+                    break
+>>>>>>> origin/development
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
