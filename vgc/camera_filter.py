@@ -67,7 +67,7 @@ class CameraFilter:
     def update(self, camera_yaw , camera_pitch, camera_zoom):
 
         """Updates the cropping values of the CameraFilter."""
-
+        """
         if not 0 <= camera_yaw <= 360:
             raise ValueError("camera_yaw out of bounds (0 to 360)")
 
@@ -76,7 +76,7 @@ class CameraFilter:
 
         if not 2 <= camera_zoom:
             raise ValueError("camera_zoom out of bounds ( >= 2)")
-
+        """
         self.semaphore.acquire()
 
         self.camera_yaw  = camera_yaw
@@ -145,7 +145,7 @@ class CameraFilter:
                 self.stopped = True
             self.semaphore.release()
 
-            cap.release()
+        cap.release()
 
 
         cv2.destroyAllWindows()
