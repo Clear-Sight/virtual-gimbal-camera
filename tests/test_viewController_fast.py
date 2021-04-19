@@ -18,10 +18,10 @@ which executes all the different testfunctions.
 import numpy as np
 import matplotlib.pyplot as plt
 from vgc.view_controller_fast import ViewController
-#from vgc.pipeline import Pipeline
-#import threading
+from vgc.pipeline import Pipeline
+import threading
 
-vc = ViewController(0)
+vc = Pipeline().view_controller
 
 SIZE = 200
 VIEW_SIZE = 50
@@ -81,6 +81,7 @@ def get_camera_angle_when_pitch(pitch):
     This function tests if the camera angle
     behaves accordingly if the drone pitches.
     """
+    pitch = np.deg2rad(pitch)
     vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
     vc.main()
@@ -91,6 +92,7 @@ def get_camera_angle_when_yaw(yaw):
     This function tests if the camera angle
     behaves accordingly if the drone yaws.
     """
+    yaw = np.deg2rad(yaw)
     vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
     vc.main()
@@ -101,6 +103,7 @@ def get_camera_angle_when_roll(roll):
     This function tests if the camera angle
     behaves accordingly if the drone rolls.
     """
+    roll = np.deg2rad(roll)
     vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
@@ -154,6 +157,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     vc.update_fixhawk_input(roll, yaw, pitch, height, d_long, d_lat)
     vc.update_server_input(theta, phi, lock_on)
     vc.main()
+    print(vc.d_roll, vc.d_yaw, vc.d_pitch)
 
     #Target coordinate as a point
     if lock_on:
@@ -167,7 +171,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
 
     p_3dcoordinate = np.matrix([[x_diff], [y_diff], [-height]])
 
-    rot_matrix = vc.rotation_matrix(roll, yaw, pitch)
+    rot_matrix = vc.rotation_matrix(vc.d_roll, vc.d_yaw, vc.d_pitch)
     rot_matrix_inv = rot_matrix.transpose()
 
     # Figure
@@ -175,14 +179,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     ax = fig.gca(projection='3d', xlim=(-1 * SIZE, SIZE), ylim=(-1 * SIZE, SIZE),
     zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
     ax.set_ylabel('Drönarens riktning (y)')
-    ax.set_xlabel('Drönarens sidor (x)')
-
-    # Plot camera sphere
-    u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
-    x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
-    y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
-    z = -(VIEW_SIZE)*np.cos(v)
-    ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
+    ax.set_xlabel('Drönarens riktning (x)')
 
     # Plot ground
     point = np.array([[0], [0], [-height]])
@@ -195,7 +192,14 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     xx, yy = np.meshgrid(range(-SIZE,SIZE+100,100), range(-SIZE,SIZE+100,100),
     sparse = True)
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
-    ax.plot_surface(xx, yy, z, alpha = 0.5)
+    ax.plot_surface(xx, yy, z, alpha = 0.2)
+
+    # Plot camera sphere
+    u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
+    x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
+    y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
+    z = -(VIEW_SIZE)*np.cos(v)
+    ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
 
     # Plot target coordinate
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
@@ -203,21 +207,43 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     p_3dcoordinate.item(2), marker = '^')
 
     # Plot drone direction
-    drone_dir = vc.angular_to_spherical(90, 0)
-
-    ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1),
-    drone_dir.item(2)*VIEW_SIZE, marker = '^')
+    drone_dir_y = vc.angular_to_spherical(90, 0)
+    #drone_dir_y = rot_matrix.dot(drone_dir_y)
+    ax.scatter(VIEW_SIZE*drone_dir_y.item(0), VIEW_SIZE*drone_dir_y.item(1),
+    drone_dir_y.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
+    # Plot drone top
+    drone_dir_z = vc.angular_to_spherical(180, 0)
+    #drone_dir_z = rot_matrix.dot(drone_dir_z)
+    ax.scatter(VIEW_SIZE*drone_dir_z.item(0), VIEW_SIZE*drone_dir_z.item(1),
+    drone_dir_z.item(2)*VIEW_SIZE, marker = '^')
+
+    # Plot drone x
+    drone_dir_x = vc.angular_to_spherical(90, 90)
+    #drone_dir_x = rot_matrix.dot(drone_dir_x)
+    ax.scatter(VIEW_SIZE*drone_dir_x.item(0), VIEW_SIZE*drone_dir_x.item(1),
+    drone_dir_x.item(2)*VIEW_SIZE, marker = '^')
+
     # Plot North
-    north = rot_matrix_inv.dot(drone_dir)
+    north = vc.angular_to_spherical(90, 0)
+    north = rot_matrix_inv.dot(north)
     ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
     VIEW_SIZE * north.item(2), marker='o')
 
-    # Plot camera angle
+    # Plot initial camera angle
+    theta_in, phi_in = vc.theta_in, vc.phi_in
+    cam_dir = vc.angular_to_spherical(theta_in, phi_in)
+    #ax.scatter(VIEW_SIZE*cam_dir.item(0),
+    #VIEW_SIZE*cam_dir.item(1), VIEW_SIZE*cam_dir.item(2),
+    #marker = 'x')
+    
+    #Plot final camera angle
     theta_final, phi_final = vc.theta_final, vc.phi_final
-    cam_dir_adjusted = vc.angular_to_spherical(theta_final, phi_final)
-    ax.scatter(VIEW_SIZE*cam_dir_adjusted.item(0),
-    VIEW_SIZE*cam_dir_adjusted.item(1), VIEW_SIZE*cam_dir_adjusted.item(2),
+    cam_dir_final = vc.angular_to_spherical(theta_final, phi_final)
+    #cam_dir_final = rot_matrix.dot(cam_dir)
+    ax.scatter(VIEW_SIZE*cam_dir_final.item(0),
+    VIEW_SIZE*cam_dir_final.item(1), VIEW_SIZE*cam_dir_final.item(2),
     marker = 'x')
     plt.show()
+   

@@ -7,14 +7,18 @@ fix the view to a certaion point given longitude and latitude coordinates.
 Classes:
 ViewController
 
-INPUT from inputRegulator.py
-(There is a setter to this.)
+Threading:
+pipepline
+thread
+
+INPUT from input_adapter.py
+(See the setter "update_server_input")
 theta_in
 phi_in
 lock_on (true/false)
 
-INPUT from fixHawkadapter.py
-(There is a setter to this.)
+INPUT from autopilot_adapter.py
+(See the setter "update_fixhawk_input")
 d_roll
 d_yaw
 d_pitch
@@ -22,9 +26,11 @@ d_height
 d_coordinate
 
 OUTPUT to cameraFilter.py
-(There is a getter to this)
-phi_final
-dist_from_center
+(Called on in main)
+camera_pitch
+camera_yaw
+camera_roll
+camera_zoom
 """
 # pylint: disable=no-self-use
 # There is no better place for these functions
@@ -72,7 +78,7 @@ class ViewController():
         """
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
-        #self.thread = threading.Thread(target=self.main)
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
         
         self.d_roll = 0
         self.d_pitch = 0
@@ -98,9 +104,9 @@ class ViewController():
         # OUTPUT VARIABLES
         # These variables reflect where on the image feeded from the camera
         # we wish to look. If, say, we want to look north and in a 45-degree
-        # angle and the drone has yawed right by 30 degrees, our phi_final
-        # would be -30 degrees and
-        # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
+        # angle and the drone has yawed right by 30 degrees, our camera_yaw
+        # would be -30 degrees and camera_pitch is -45 degrees.
+        self.camera_roll = 0
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
@@ -109,7 +115,7 @@ class ViewController():
         """
         Start thread
         """
-        pass
+        self.thread.start()
 
 
     def main_thread(self):
@@ -125,9 +131,9 @@ class ViewController():
         SETTER
         """
         if not self.new_fixhawk_values:
-            self.d_roll = roll
-            self.d_pitch = pitch
-            self.d_yaw = yaw
+            self.d_roll = self.rad2deg(roll)
+            self.d_pitch = self.rad2deg(pitch)
+            self.d_yaw = self.rad2deg(yaw)
             if height >= 0:
                 self.d_height = height
             self.d_coordinate = (lon, lat)
@@ -218,7 +224,7 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-    def main(self):
+    def main(self, is_threading=False, debug=False):
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and
@@ -226,34 +232,41 @@ class ViewController():
         looking. Then you can call the getter-function to recieve
         the updated values.
         """
-        if self.new_fixhawk_values or self.new_server_values:
-            self.new_fixhawk_values = True
-            self.new_server_values = True
-            if self.lock_on:
-                if self.init_lock_on:
-                    self.aim_coordinate = self.point_to_coordinate(
-                        self.theta_in, self.phi_in,
-                        self.d_height, self.d_coordinate)
-                    self.init_lock_on = False
+        while True:
+            if self.new_fixhawk_values or self.new_server_values:
+                self.new_fixhawk_values = True
+                self.new_server_values = True
+                if self.lock_on:
+                    if self.init_lock_on:
+                        self.aim_coordinate = self.point_to_coordinate(
+                            self.theta_in, self.phi_in,
+                            self.d_height, self.d_coordinate)
+                        self.init_lock_on = False
 
-                (theta_temp, phi_temp) = self.coordinate_to_point(
-                    self.d_coordinate, self.aim_coordinate, self.d_height)
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(theta_temp, phi_temp)
-                self.camera_pitch = tf.sin(self.theta_final)
-                self.camera_yaw = self.phi_final
-                self.new_fixhawk_values = False
-                self.new_server_values = False
-            else:
-                self.theta_final, self.phi_final = \
-                self.adjust_aim(self.theta_in, self.phi_in)
-                self.camera_pitch = tf.sin(self.theta_final)
-                self.new_server_values = False
-                self.new_fixhawk_values = False
-            #self.pipeline.set_cropping_point(
-            #    self.camera_yaw,
-            #    self.camera_pitch,
-            #    self.camera_zoom)
+                    (theta_temp, phi_temp) = self.coordinate_to_point(
+                        self.d_coordinate, self.aim_coordinate, self.d_height)
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(theta_temp, phi_temp)
+                    self.camera_pitch = tf.sin(self.theta_final)
+                    self.camera_yaw = self.phi_final
+                    self.new_fixhawk_values = False
+                    self.new_server_values = False
+                else:
+                    self.theta_final, self.phi_final = \
+                    self.adjust_aim(self.theta_in, self.phi_in)
+                    self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
+                    self.new_server_values = False
+                    self.new_fixhawk_values = False
+                self.camera_roll = -self.d_roll
+                if not debug:
+                    self.pipeline.set_cropping(
+                        self.camera_yaw,
+                        self.camera_pitch,
+                        self.camera_roll,
+                        self.camera_zoom)
+            if not is_threading:
+                break
+
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
@@ -287,7 +300,7 @@ class ViewController():
                                 [0, tf.cos(pitch_rad), -tf.sin(pitch_rad)],
                                 [0, tf.sin(pitch_rad), tf.cos(pitch_rad)]
                                 ])
-        return roll_matrix.dot(yaw_matrix.dot(pitch_matrix))
+        return yaw_matrix.dot(pitch_matrix.dot(roll_matrix))
 
     def earth_radius_at_lat(self, lat):
         """

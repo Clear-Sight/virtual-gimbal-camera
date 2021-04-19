@@ -30,7 +30,7 @@ class Pipeline:
         self.input_adapter.start()
 
 
-    def set_cropping(self, camera_yaw, camera_pitch, camera_zoom=2):
+    def set_cropping(self, camera_yaw, camera_pitch, camera_roll, camera_zoom=2):
         """" Sets the point for the filter to crop out """
         self.camera_filter.update(camera_yaw=camera_yaw, camera_pitch=camera_pitch, camera_zoom=camera_zoom)
 

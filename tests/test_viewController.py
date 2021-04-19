@@ -14,14 +14,12 @@ which executes all the different testfunctions.
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals
 # Rather too many local variables than using magic numbers.
-# Also, 9 arguments for function "plot" is necessary.f
-import sys
-sys.path.insert(1, '../')
+# Also, 9 arguments for function "plot" is necessary.
 import numpy as np
 import matplotlib.pyplot as plt
 from vgc.view_controller import ViewController
 from vgc.pipeline import Pipeline
-#import threading
+import threading
 
 vc = Pipeline().view_controller
 
@@ -78,6 +76,7 @@ def get_camera_angle_when_pitch(pitch):
     This function tests if the camera angle
     behaves accordingly if the drone pitches.
     """
+    pitch = np.deg2rad(pitch)
     vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
     vc.main()
@@ -88,6 +87,7 @@ def get_camera_angle_when_yaw(yaw):
     This function tests if the camera angle
     behaves accordingly if the drone yaws.
     """
+    yaw = np.deg2rad(yaw)
     vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
     vc.main()
@@ -98,6 +98,7 @@ def get_camera_angle_when_roll(roll):
     This function tests if the camera angle
     behaves accordingly if the drone rolls.
     """
+    roll = np.deg2rad(roll)
     vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
@@ -201,6 +202,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
 
     # Plot drone direction
     drone_dir = vc.angular_to_spherical(90, 0)
+
 
     ax.scatter(VIEW_SIZE*drone_dir.item(0), VIEW_SIZE*drone_dir.item(1),
     drone_dir.item(2)*VIEW_SIZE, marker = '^')

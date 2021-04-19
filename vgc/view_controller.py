@@ -12,13 +12,13 @@ pipepline
 thread
 
 INPUT from input_adapter.py
-(There is a setter to this.)
+(See the setter "update_server_input")
 theta_in
 phi_in
 lock_on (true/false)
 
 INPUT from fixHawkadapter.py
-(There is a setter to this.)
+(See the setter "update_fixhawk_input")
 d_roll
 d_yaw
 d_pitch
@@ -26,9 +26,11 @@ d_height
 d_coordinate
 
 OUTPUT to cameraFilter.py
-(There is a getter to this)
-phi_final
-dist_from_center
+(Called on in main)
+camera_pitch
+camera_yaw
+camera_roll
+camera_zoom
 """
 # pylint: disable=no-self-use
 # There is no better place for these functions
@@ -105,16 +107,11 @@ class ViewController():
         # These variables reflect where on the image feeded from the camera
         # we wish to look. If, say, we want to look north and in a 45-degree
         # angle and the drone has yawed right by 30 degrees, our phi_final
-        # would be -30 degrees and
-        # dist_from_center = IMAGE_RADIUS * np.sin(theta_final).
-
-        self.phi_final = 0
-        self.dist_from_center = 0
-
+        # would be -30 degrees and camera_pitch is -45 degrees.
+        self.camera_roll = 0
         self.camera_yaw = 0
         self.camera_pitch = 0
         self.camera_zoom = 2
-
 
     def start(self):
         """
@@ -136,9 +133,9 @@ class ViewController():
         SETTER
         """
         if not self.new_fixhawk_values:
-            self.d_roll = roll
-            self.d_pitch = pitch
-            self.d_yaw = yaw
+            self.d_roll = np.rad2deg(roll)
+            self.d_pitch = np.rad2deg(pitch)
+            self.d_yaw = np.rad2deg(yaw)
             if height >= 0:
                 self.d_height = height
             self.d_coordinate = (lon, lat)
@@ -251,15 +248,16 @@ class ViewController():
                     self.camera_yaw = self.phi_final
                     self.new_server_values = False
                     self.new_fixhawk_values = False
+                self.camera_roll = self.d_roll
                 if not debug:
-                    print("NOT TESTING")
-                    self.pipeline.set_cropping_point(
-                        self.camera_yaw,
+                    self.pipeline.set_cropping(
+                        self.camera_yaw, 
                         self.camera_pitch,
+                        self.camera_roll,
                         self.camera_zoom)
-                print("TESTING")
             if not is_threading:
                 break
+
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
@@ -293,7 +291,7 @@ class ViewController():
                                 [0, np.cos(pitch_rad), -np.sin(pitch_rad)],
                                 [0, np.sin(pitch_rad), np.cos(pitch_rad)]
                                 ])
-        return roll_matrix.dot(yaw_matrix.dot(pitch_matrix))
+        return yaw_matrix.dot(pitch_matrix.dot(roll_matrix))
 
     def earth_radius_at_lat(self, lat):
         """
