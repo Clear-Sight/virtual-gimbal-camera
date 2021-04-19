@@ -217,11 +217,7 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-<<<<<<< HEAD
     def main(self, is_threading=False, debug=False):
-=======
-    def main(self, is_threading=False):
->>>>>>> origin/development
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and
@@ -251,7 +247,6 @@ class ViewController():
                 else:
                     self.theta_final, self.phi_final = \
                     self.adjust_aim(self.theta_in, self.phi_in)
-<<<<<<< HEAD
                     self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
                     self.camera_yaw = self.phi_final
                     self.new_server_values = False
@@ -265,21 +260,6 @@ class ViewController():
                 print("TESTING")
             if not is_threading:
                 break
-=======
-                    self.camera_pitch = np.sin(self.theta_final)
-                    self.camera_yaw = self.phi_final
-                    self.new_server_values = False
-                    self.new_fixhawk_values = False
-
-                #BUG: calls pipeline during testing with out of bounds variables
-                # camera_pitch was negative
-                #self.pipeline.set_cropping(
-                    #self.camera_yaw,
-                    #self.camera_pitch,
-                    #self.camera_zoom)
-                if not is_threading:
-                    break
->>>>>>> origin/development
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
