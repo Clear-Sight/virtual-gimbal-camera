@@ -1,7 +1,7 @@
 {
 "input_domain": "localhost:24474",
 "output_domain": "localhost:7777",
-"debug": true,
+"debug": false,
 "local": false,
 "cam_width": 640,
 "cam_height": 480,
