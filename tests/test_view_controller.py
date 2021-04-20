@@ -26,6 +26,12 @@ vc = Pipeline().view_controller
 SIZE = 200
 VIEW_SIZE = 50
 
+
+def is_close(x, y, margin):
+    if type(x) is tuple:
+        return abs(x[0] - y[0]) <= margin and abs(x[1] - y[1]) <= margin
+    return abs(x - y) <= margin
+
 def test_main():
     """
     This function is to be called to execute all the tests to
@@ -36,27 +42,27 @@ def test_main():
     Instead, the numpy function allclose is used to compare expected
     return values.
     """
-    margin = 0.00000001 #Margin of error for functions' return values
+    margin = 0.5 #Margin of error for functions' return values
 
     # Test getting the right target coordiante even if we move
     for test_coord in [(10, 13), (0, 0), (-13, -37)]:
-        assert np.allclose(get_target_coordinate(test_coord),
-        test_coord, margin, margin)
+        assert is_close(get_target_coordinate(test_coord),
+        test_coord, margin)
 
     # Test if theta is correct when we yaw
     for testyaw in [45, -45, 360, 1066]:
-        assert np.allclose(get_camera_angle_when_yaw(testyaw)[0],
+        assert is_close(get_camera_angle_when_yaw(testyaw)[0],
     45, margin)
 
     # Test if theta is right when we roll
     for testroll in [-10, 25, 40]:
-        assert np.allclose(get_camera_angle_when_roll(testroll),
-        (45 + testroll, 90), margin, margin)
+        assert is_close(get_camera_angle_when_roll(testroll),
+        (45 + testroll, 90), margin)
 
     # Test if theta and phi is right when we pitch
     for testpitch in [-42, 69, 0.1]:
-        assert np.allclose(get_camera_angle_when_pitch(testpitch),
-        (np.abs(testpitch), unitstep(testpitch)), margin, margin)
+        assert is_close(get_camera_angle_when_pitch(testpitch),
+        (np.abs(testpitch), unitstep(testpitch)), margin)
 
     # Test if height doesn't change when entering an invalid value
     for test_height in [-10, 10, 9999, 1000]:

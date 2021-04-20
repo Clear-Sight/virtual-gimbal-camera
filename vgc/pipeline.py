@@ -1,6 +1,6 @@
 
 from .camera_filter import CameraFilter
-from .view_controller import ViewController
+from .view_controller_fast import ViewController
 from .io.input_adapter import InputAdapter
 from .config import CONFIG
 
