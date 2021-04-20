@@ -46,4 +46,4 @@ class Pipeline:
         if CONFIG["debug"]:
             print(f"user input recieved: {usr_msg}")
         self.view_controller.update_server_input(
-            usr_msg["angle"], usr_msg["compass"], usr_msg["lock_on"])
+            usr_msg["angle"], usr_msg["compass"], usr_msg["lock_on"], usr_msg["zoom"])
