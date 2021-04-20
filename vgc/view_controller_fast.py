@@ -188,7 +188,10 @@ class ViewController():
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
         x_diff = tf.tan(self.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
         y_diff = tf.tan(self.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
-        phi = np.arctan2(x_diff, y_diff)
+        if(x_diff == 0 and y_diff == 0):
+            phi = 0
+        else:
+            phi = np.arctan2(x_diff, y_diff)
         theta_2 = tf.arctan((((x_diff**2) + (y_diff**2))**0.5) / height)
         return self.rad2deg(theta_2), (self.rad2deg(phi) + 360) % 360
 
