@@ -224,7 +224,7 @@ class ViewController():
         aim_spherical_adjusted = inverse_rotation_matrix.dot(aim_spherical)
         return self.spherical_to_angular(aim_spherical_adjusted)
 
-    def main(self, is_threading=False, debug=False):
+    def main(self, is_threading=False, debug=True):
         """
         Main-function that runs all the time and updates our view
         angle. Other components simply call the setter functions and

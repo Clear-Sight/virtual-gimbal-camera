@@ -1,51 +1,42 @@
+/*This module consists of sped-up mathematical functions, using
+* Taylor polynomials and/or self-constructed estimations. Since
+* Python does not recognize c-floats, all values are returned as
+* integers, 10^6 times larger than the actual value. The returned
+* values must be divided by 10^6.
+*
+* Functions:
+* int roundToNearest(float x, float multiple)
+* int cos_t(float x)
+* int sin_t(float x)
+* int arctan_t_2(float x)
+* int tan_t(float x)
+*/
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <sys/time.h>
-//gcc -shared -o libhello.so -fPIC hello.c
 
 const float f_pi = 3.141592653589f;
 
-int closest(float n, float x){
-    int n_temp = (int)(n * 100);
-    int x_temp = (int)(x * 100);
-    if(x_temp > n_temp){
-        if(x_temp/2 > n_temp){
-            return 0;
-        }
-        return 1;
-    }
-    n_temp += x_temp/2;
-    n_temp -= (n_temp%x_temp);
-    return n_temp/x_temp;
-}
-
-bool equals(float x, float y){
-    return(fabs(x - y) <= 0.001f);
-}
-
-bool close(float x, float y){
-    float comp = f_pi/12;
-    return((x - y) <= comp && (y - x) <= comp);
-}
-
 int roundToNearest(float x, float multiple){
+    /*Returns the closest multiple n of multiple to the given
+    * x, according to: multiple*n =/closest to/= x.
+    * For example, x = 13 and multiple = 5 would return 3,
+    * since 5*3 is closest to 13.
+    */
     x = x + multiple/2;
     if(x < 0){
         return 0;
     }
-    //int x_temp = (int)(x * 100);
-    //int m_temp = (int)(multiple * 100);
     return(int)(x / multiple);
 }
 
 int cos_t(float x){
-    /*Returns the cosine value, multiplied by 1000000.
-    * This is because Python cannot interpret a float.
-    * Therefore when the value is fetched it must be 
-    * divided by 1000000 (10^6). 
+    /*Returns the cosine value of the given x.
+    * Works for all values of x. Larger values may be slow.
+    * The function works by first finding the closest multiple
+    * of pi/6 to the given value x, and then using the Taylor
+    * polynome around the given multiple of pi/6.
     */
-    //printf("Input: as float: %f, as int: %i\n", x);
     float mult = 1000000.0f;
     while(x < 0){
         x += 2*f_pi;
@@ -58,7 +49,6 @@ int cos_t(float x){
         mult = -1000000.0f;
     }
     int point = roundToNearest(x, f_pi/6);
-    //int point = closest(x, f_pi/6);
     float a = x - point*f_pi/6;
     switch(point){
         case 0:
@@ -80,32 +70,21 @@ int cos_t(float x){
     }
 }
 
-    
-int arctan_t(float x){
-    /**
-    Fast version of arctan(x)
+int arctan_t_2(float x){
+    /*Returns the arctan value of the given x. If a negative
+    * value is needed, make use of the identity 
+    * arctan(-x) = -arctan(x).
+    * The function used is self-produced, and can therefore not
+    * be properly proved. The returned value differs with at most
+    * 0.0874 radians.
     */
     int mult = 1000000;
- 
-    //int point = roundToNearest(x, f_pi/6);
-    //float a = x - point*f_pi/6;
-    if(x < 0 || x > f_pi/6){
-        return 0;
-    }
-    else{
-        return (int)(mult * (x - (x * x * x) / 3));
- }
-}
-
-int arctan_t_2(float x){
-    int mult = 1000000;
-    float a = 0.8f * x;
-    float b = 0.1f * x*x;
-    float c = 0.05f * x * x *x;
+    float a = 0.8f*x;
+    float b = 0.1f*x*x;
+    float c = 0.05f*x*x*x;
     float pi_2 = f_pi/2;
-    return (int)(mult*(pi_2 - (pi_2 / (1 + a + b + c))));
+    return (int)(mult*(pi_2 - (pi_2/(1 + a + b + c))));
 }
-
 
 int tan_t(float x){
     /*This tangens only operates between x = 0
@@ -125,163 +104,15 @@ int tan_t(float x){
     }
 }
 
-
-    /*
-    if(close(x, 0)){
-        return((int)(mult*(1 - 0.5*(x * x))));
-    }
-    if(close(x, f_pi/6)){
-        return((int)(mult*(0.866f - 0.5f*(x - f_pi/6))));
-    }
-    if(close(x, f_pi/3)){
-        return((int)(mult*(0.5f - 0.866f*(x - f_pi/3))));
-    }
-    if(close(x, f_pi/2)){
-        return((int)(mult*(-x + f_pi/2)));
-    }
-    if(close(x, 2*f_pi/3)){
-        return((int)(mult*(-0.5f - 0.866f*(x - 2*f_pi/3))));
-    }
-    if(close(x, 5*f_pi/6)){
-        return((int)(mult*(-0.866f - 0.5f*(x - 5*f_pi/6))));
-    }
-    if(close(x, f_pi)){
-        return((int)(mult*(-1 + 0.5f*(x - f_pi)*(x - f_pi))));
-    }*/
-    
-    //printf("None found, nearest point = %f, 5pi/6 = %f\n", point, 5*pi/6);
-    //printf("%i", point == 5*pi/6);
-
 int sin_t(float x){
+    /* Given a float x, which should be in radians,
+    we return its sine value using the fast version of the cosine.
+    For more information, see the function cos_t(float x).
+    */
     return cos_t(f_pi/2 - x);
 }
 
-int getInt(){
-    return 1337;
-}
-
-char getChar(){
-    return 'b';
-}
-void test_time_closest(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        bool x = closest(1.5f, 0.5f);
-    }
-    gettimeofday(&stop, NULL);
-    printf("Closest took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_close(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        bool x = close(1.5f, 0.5f);
-    }
-    gettimeofday(&stop, NULL);
-    printf("Close took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_nearest(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        bool x = roundToNearest(1.5f, f_pi/6);
-    }
-    gettimeofday(&stop, NULL);
-    printf("Nearest took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_cos(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        float input = i / 100000;
-        int x = cos_t(input);
-    }
-    gettimeofday(&stop, NULL);
-    printf("Cos took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_mathcos(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        float input = i / 100000;
-        int x = cos(input);
-    }
-    gettimeofday(&stop, NULL);
-    printf("Math.h took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_tan(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        float input = i / 1000000;
-        int x = tan_t(input);
-    }
-    gettimeofday(&stop, NULL);
-    printf("tan took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_mathtan(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000000.0f; i++){
-        float input = i / 1000000;
-        int x = tan(input);
-    }
-    gettimeofday(&stop, NULL);
-    printf("math.h tan took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_arctan(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000.0f; i+=0.001f){
-        int x = arctan_t_2(i);
-    }
-    gettimeofday(&stop, NULL);
-    printf("arctan took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
-void test_time_matharctan(){
-    struct timeval stop, start;
-    gettimeofday(&start, NULL);
-    for(float i = 0.0f; i < 1000.0f; i+=0.001f){
-        int x = atan(i);
-    }
-    gettimeofday(&stop, NULL);
-    printf("math.h arctan took %lu us\n", (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec);
-}
-
 int main(){
-    float res1;
-    float res2;
-    float res3;
-    for(float i = 4.68f; i < 4.74f; i+=0.000001f){
-        res1 = (float)sin_t(i) / 1000000;
-        res2 = (float)cos_t(i) / 1000000;
-        res3 = (float)tan_t(i) / 1000000;
-        if(abs(res1) > 1 || abs(res2) > 1){
-            printf("sin(%f) = %f, off by: %f\n", i, res1, fabs(res1 - (float)sin(i)));
-            printf("cos(%f) = %f, off by: %f\n", i, res2, fabs(res2 - (float)cos(i)));
-        }
-        if(i < f_pi/2){
-            //printf("tan(%f) = %f, off by: %f\n", i, res3, fabs(res3 - (float)tan(i)));
-        }
-    }
-    //test_time_nearest();
-    //test_time_close();
-    //test_time_closest();
-    //test_time_cos();
-    //test_time_tan();
-    //test_time_mathtan();
-    //test_time_mathcos();
-    //test_time_arctan();
-    //test_time_matharctan();
     return 0;
 }
 
