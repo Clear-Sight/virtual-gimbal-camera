@@ -25,12 +25,13 @@ class InputAdapter:
 
     def get_usr_input(self):
         """ Fetch user input from web server via GET request. """
-        try:
-            r = requests.get(
+        msg = self.cached_usr_msg
+        r = requests.get(
             f'http://{CONFIG["input_domain"]}/drone/user/fetch')
-            return r.json()
-        except:
+        if r.status_code != 200:
             return self.cached_usr_msg
+        else:
+            return r.json()
 
     def push(self):
         """
