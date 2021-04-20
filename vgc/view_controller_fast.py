@@ -131,13 +131,14 @@ class ViewController():
         SETTER
         """
         if not self.new_fixhawk_values:
+            self.new_fixhawk_values = True
             self.d_roll = self.rad2deg(roll)
             self.d_pitch = self.rad2deg(pitch)
             self.d_yaw = self.rad2deg(yaw)
             if height >= 0:
                 self.d_height = height
             self.d_coordinate = (lon, lat)
-            self.new_fixhawk_values = True
+
 
     def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
@@ -145,6 +146,7 @@ class ViewController():
         SETTER
         """
         if not self.new_server_values:
+            self.new_server_values = True
             if not lock_on:
                 if theta > 90:
                     self.theta_in = 89
@@ -160,7 +162,7 @@ class ViewController():
             self.lock_on = lock_on
             if(zoom_in >= 2 and zoom_in <= 50):
                 self.camera_zoom = zoom_in
-            self.new_server_values = True
+
 
     def deg2rad(self, degrees):
         """
