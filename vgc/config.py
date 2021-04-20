@@ -1,4 +1,4 @@
-import json 
+import json
 
 def load_config():
     """ returns a dict of the config from config.json """
@@ -8,4 +8,3 @@ def load_config():
     return conf
 
 CONFIG = load_config()
-
