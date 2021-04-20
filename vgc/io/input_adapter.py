@@ -16,7 +16,7 @@ class InputAdapter:
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
         self.usr_msg = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
-        self.cached_usr_msg = {}
+        self.cached_usr_msg = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
 
     def start(self):
         """ thread starting funciton """
