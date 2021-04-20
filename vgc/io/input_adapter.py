@@ -15,8 +15,9 @@ class InputAdapter:
     def __init__(self, pipeline):
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
+        self.DEFAULT_USR_MSG = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
         self.usr_msg = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
-        self.cached_usr_msg = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
+        self.cached_usr_msg = {}
 
     def start(self):
         """ thread starting funciton """
@@ -27,8 +28,8 @@ class InputAdapter:
         """ Fetch user input from web server via GET request. """
         r = requests.get(
             f'http://{CONFIG["input_domain"]}/drone/user/fetch')
-        if r.status_code != 200:
-            return self.cached_usr_msg
+        if not r.ok:
+            return self.DEFAULT_USR_MSG
         else:
             return r.json()
 
