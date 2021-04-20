@@ -148,7 +148,7 @@ class ViewController():
         if not self.new_server_values:
             self.new_server_values = True
             if not lock_on:
-                if theta > 90:
+                if theta >= 90:
                     self.theta_in = 89
                     self.phi_in = phi
                 elif theta < 0:
