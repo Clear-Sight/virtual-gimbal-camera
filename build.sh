@@ -1,1 +1,1 @@
-gcc -shared -o trigonometric_fast.so -fPIC trigonometric_fast.c
+gcc -shared -o ./vgc/trigonometric_fast.so -fPIC ./vgc/trigonometric_fast.c
