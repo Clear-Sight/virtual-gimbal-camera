@@ -25,7 +25,6 @@ class InputAdapter:
 
     def get_usr_input(self):
         """ Fetch user input from web server via GET request. """
-        msg = self.cached_usr_msg
         r = requests.get(
             f'http://{CONFIG["input_domain"]}/drone/user/fetch')
         if r.status_code != 200:
