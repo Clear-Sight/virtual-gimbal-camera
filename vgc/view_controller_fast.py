@@ -78,8 +78,8 @@ class ViewController():
         """
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
-        
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True, 'debug':False})
+
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -255,6 +255,7 @@ class ViewController():
                     self.theta_final, self.phi_final = \
                     self.adjust_aim(self.theta_in, self.phi_in)
                     self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
+                    self.camera_yaw = self.phi_final
                     self.new_server_values = False
                     self.new_fixhawk_values = False
                 self.camera_roll = -self.d_roll
