@@ -43,4 +43,4 @@ class InputAdapter:
             if self.usr_msg != self.cached_usr_msg:
                 self.cached_usr_msg = self.usr_msg
                 self.push()
-            time.sleep(1) # maybe should be something better
+            time.sleep(CONFIG["input_check_frequency"]) # maybe should be something better

@@ -17,7 +17,7 @@ theta_in
 phi_in
 lock_on (true/false)
 
-INPUT from fixHawkadapter.py
+INPUT from autopilot_adapter.py
 (See the setter "update_fixhawk_input")
 d_roll
 d_yaw
@@ -45,6 +45,7 @@ camera_zoom
 # 7 arguments is needed for this function.
 
 import numpy as np
+import vgc.taylor_math_functions as tf
 import threading
 
 class ViewController():
@@ -62,8 +63,6 @@ class ViewController():
     point_to_coordinate()
     adjust_aim()
     main()
-    start()
-    main_thread()
     """
 
     def __init__(self, pipeline):
@@ -78,9 +77,8 @@ class ViewController():
         around the z-axis.
         """
         #Threading parameters, need pipeline in init
-
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
+        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True, 'debug':False})
 
         self.d_roll = 0
         self.d_pitch = 0
@@ -106,7 +104,7 @@ class ViewController():
         # OUTPUT VARIABLES
         # These variables reflect where on the image feeded from the camera
         # we wish to look. If, say, we want to look north and in a 45-degree
-        # angle and the drone has yawed right by 30 degrees, our phi_final
+        # angle and the drone has yawed right by 30 degrees, our camera_yaw
         # would be -30 degrees and camera_pitch is -45 degrees.
         self.camera_roll = 0
         self.camera_yaw = 0
@@ -133,15 +131,15 @@ class ViewController():
         SETTER
         """
         if not self.new_fixhawk_values:
-            self.d_roll = np.rad2deg(roll)
-            self.d_pitch = np.rad2deg(pitch)
-            self.d_yaw = np.rad2deg(yaw)
+            self.d_roll = self.rad2deg(roll)
+            self.d_pitch = self.rad2deg(pitch)
+            self.d_yaw = self.rad2deg(yaw)
             if height >= 0:
                 self.d_height = height
             self.d_coordinate = (lon, lat)
             self.new_fixhawk_values = True
 
-    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2,):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
         Updates data from user interface
         SETTER
@@ -164,6 +162,18 @@ class ViewController():
                 self.camera_zoom = zoom_in
             self.new_server_values = True
 
+    def deg2rad(self, degrees):
+        """
+        Translates a given angle in degrees to radians.
+        """
+        return 0.0174532925 * degrees
+
+    def rad2deg(self, radians):
+        """
+        Translates a given angle in radians to degrees.
+        """
+        return radians / 0.0174532925
+
     def coordinate_to_point(self, coord1, coord2, height):
         """
         Calculates where to look given two coordinates where coord1 is
@@ -174,11 +184,11 @@ class ViewController():
         point in its angular form(theta, phi). Used in lock-on mode.
         """
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
-        x_diff = np.tan(np.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
-        y_diff = np.tan(np.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
+        x_diff = tf.tan(self.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
+        y_diff = tf.tan(self.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
         phi = np.arctan2(x_diff, y_diff)
-        theta_2 = np.arctan(np.sqrt(np.power(x_diff, 2) + np.power(y_diff, 2)) / height)
-        return np.rad2deg(theta_2), (np.rad2deg(phi) + 360) % 360
+        theta_2 = tf.arctan((((x_diff**2) + (y_diff**2))**0.5) / height)
+        return self.rad2deg(theta_2), (self.rad2deg(phi) + 360) % 360
 
     def point_to_coordinate(self, theta, phi, height, d_coord):
         """
@@ -189,13 +199,13 @@ class ViewController():
         coordinate. Thisfunction is used when lock_on mode first is
         initialized.
         """
-        p_lat = np.deg2rad(d_coord[1]) +\
-            np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.sin(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
-        p_long = np.deg2rad(d_coord[0]) +\
-            np.arctan((height * np.tan(np.deg2rad(theta))*\
-            np.cos(np.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
-        return np.rad2deg(p_long), np.rad2deg(p_lat)
+        p_lat = self.deg2rad(d_coord[1]) +\
+            tf.arctan((height * tf.tan(self.deg2rad(theta))*\
+            tf.sin(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+        p_long = self.deg2rad(d_coord[0]) +\
+            tf.arctan((height * tf.tan(self.deg2rad(theta))*\
+            tf.cos(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+        return self.rad2deg(p_long), self.rad2deg(p_lat)
 
     def adjust_aim(self, theta, phi):
         """
@@ -237,18 +247,18 @@ class ViewController():
                         self.d_coordinate, self.aim_coordinate, self.d_height)
                     self.theta_final, self.phi_final = \
                     self.adjust_aim(theta_temp, phi_temp)
-                    self.camera_pitch = np.sin(self.theta_final)
+                    self.camera_pitch = tf.sin(self.theta_final)
                     self.camera_yaw = self.phi_final
                     self.new_fixhawk_values = False
                     self.new_server_values = False
                 else:
                     self.theta_final, self.phi_final = \
                     self.adjust_aim(self.theta_in, self.phi_in)
-                    self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
+                    self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
                     self.camera_yaw = self.phi_final
                     self.new_server_values = False
                     self.new_fixhawk_values = False
-                self.camera_roll = self.d_roll
+                self.camera_roll = -self.d_roll
                 if not debug:
                     self.pipeline.set_cropping(
                         self.camera_yaw,
@@ -257,6 +267,7 @@ class ViewController():
                         self.camera_zoom)
             if not is_threading:
                 break
+
 
     def rotation_matrix(self, roll, yaw, pitch):
         """
@@ -273,22 +284,22 @@ class ViewController():
         counter-clockwise rotation is needed, the transponent can be
         used.
         """
-        roll_rad = np.deg2rad(roll)
+        roll_rad = self.deg2rad(roll)
         roll_matrix = np.matrix([
-                                [np.cos(roll_rad), 0, np.sin(roll_rad)],
+                                [tf.cos(roll_rad), 0, tf.sin(roll_rad)],
                                 [0, 1, 0],
-                                [-np.sin(roll_rad), 0, np.cos(roll_rad)]
+                                [-tf.sin(roll_rad), 0, tf.cos(roll_rad)]
                                 ])
-        yaw_rad = np.deg2rad(yaw)
+        yaw_rad = self.deg2rad(yaw)
         yaw_matrix = np.matrix([
-                                [np.cos(yaw_rad), np.sin(yaw_rad), 0],
-                                [-np.sin(yaw_rad), np.cos(yaw_rad), 0],
+                                [tf.cos(yaw_rad), tf.sin(yaw_rad), 0],
+                                [-tf.sin(yaw_rad), tf.cos(yaw_rad), 0],
                                 [0, 0, 1]])
-        pitch_rad = np.deg2rad(pitch)
+        pitch_rad = self.deg2rad(pitch)
         pitch_matrix = np.matrix([
                                 [1, 0, 0],
-                                [0, np.cos(pitch_rad), -np.sin(pitch_rad)],
-                                [0, np.sin(pitch_rad), np.cos(pitch_rad)]
+                                [0, tf.cos(pitch_rad), -tf.sin(pitch_rad)],
+                                [0, tf.sin(pitch_rad), tf.cos(pitch_rad)]
                                 ])
         return yaw_matrix.dot(pitch_matrix.dot(roll_matrix))
 
@@ -309,12 +320,12 @@ class ViewController():
         The returned value is of type numpy.matrix(see documentation
         for further information).
         """
-        theta_rad = np.deg2rad(theta)
-        phi_rad = np.deg2rad(phi)
+        theta_rad = self.deg2rad(theta)
+        phi_rad = self.deg2rad(phi)
         return np.matrix([
-                        [np.sin(theta_rad) * np.sin(phi_rad)],
-                        [np.sin(theta_rad)*np.cos(phi_rad)],
-                        [-np.cos(theta_rad)]
+                        [tf.sin(theta_rad) * tf.sin(phi_rad)],
+                        [tf.sin(theta_rad)*tf.cos(phi_rad)],
+                        [-tf.cos(theta_rad)]
                         ])
 
     def spherical_to_angular(self, coord):
@@ -328,5 +339,5 @@ class ViewController():
         tuple.
         """
         phi = np.arctan2(coord.item(0), coord.item(1))
-        theta = np.arccos(-coord.item(2))
-        return np.rad2deg(theta), np.rad2deg(phi) % 360
+        theta = tf.arccos(-coord.item(2))
+        return self.rad2deg(theta), self.rad2deg(phi) % 360
