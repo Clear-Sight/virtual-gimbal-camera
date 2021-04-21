@@ -83,7 +83,7 @@ def get_camera_angle_when_pitch(pitch):
     behaves accordingly if the drone pitches.
     """
     pitch = np.deg2rad(pitch)
-    vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
+    vc.update_autopilot_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
@@ -94,7 +94,7 @@ def get_camera_angle_when_yaw(yaw):
     behaves accordingly if the drone yaws.
     """
     yaw = np.deg2rad(yaw)
-    vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
+    vc.update_autopilot_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
@@ -105,7 +105,7 @@ def get_camera_angle_when_roll(roll):
     behaves accordingly if the drone rolls.
     """
     roll = np.deg2rad(roll)
-    vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
+    vc.update_autopilot_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return (vc.theta_final, vc.phi_final)
@@ -115,7 +115,7 @@ def get_inappropriate_theta(theta):
     This function tests that different
     thetas and checks if they are set correctly.
     """
-    vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
+    vc.update_autopilot_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
     vc.main()
     return vc.theta_in < 90 and vc.theta_in >= 0
@@ -125,7 +125,7 @@ def get_inappropriate_height(height):
     This function tests different heights
     and checks if they are set correctly.
     """
-    vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
+    vc.update_autopilot_input(0, 0, 0, height, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return vc.d_height >= 0 and vc.d_height < 10000
@@ -136,7 +136,7 @@ def get_target_coordinate(coord):
     tries to move to another point. This should not be possible
     since we looked on a specific coordinat.
     """
-    vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
+    vc.update_autopilot_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
     vc.main()
     vc.update_server_input(25, 25, True)
@@ -155,7 +155,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     if lock_on:
         vc.update_server_input(theta, phi, False)
         vc.main()
-    vc.update_fixhawk_input(roll, yaw, pitch, height, d_long, d_lat)
+    vc.update_autopilot_input(roll, yaw, pitch, height, d_long, d_lat)
     vc.update_server_input(theta, phi, lock_on)
     vc.main()
 

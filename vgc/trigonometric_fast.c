@@ -79,11 +79,10 @@ int arctan_t_2(float x){
     * 0.0874 radians.
     */
     int mult = 1000000;
-    float a = 0.8f*x;
-    float b = 0.1f*x*x;
-    float c = 0.05f*x*x*x;
+    float a = 0.76f*x;
+    float b = 0.2f*x*x;
     float pi_2 = f_pi/2;
-    return (int)(mult*(pi_2 - (pi_2/(1 + a + b + c))));
+    return (int)(mult*(pi_2 - (pi_2/(1 + a + b))));
 }
 
 int tan_t(float x){

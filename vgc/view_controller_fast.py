@@ -282,7 +282,9 @@ class ViewController():
                 self.adjust_aim(self.theta, self.phi)
                 self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
                 self.camera_yaw = self.phi_final
-            self.camera_roll = -self.d_roll
+            self.camera_roll = -self.d_roll*tf.cos(self.deg2rad(self.phi_final))+\
+                -self.d_pitch*tf.sin(self.deg2rad(self.phi_final))
+
             if not debug:
                 self.pipeline.set_cropping(
                     self.camera_yaw,
