@@ -4,6 +4,7 @@ Software interface for the autopilot
 from .config import CONFIG
 import time
 from pymavlink import mavutil
+import threading
 
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """
