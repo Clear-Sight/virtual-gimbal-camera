@@ -140,6 +140,7 @@ class ViewController():
         SETTER
         """
         if not self.autopilot_write:
+            print("New autopilot values: ", roll, yaw, pitch)
             self.autopilot_write = True
             self.d_roll_in = self.rad2deg(roll)
             self.d_pitch_in = self.rad2deg(pitch)
@@ -250,6 +251,7 @@ class ViewController():
         """
         while True:
             if not self.autopilot_write:
+                print("Copying values for calculations...\n")
                 self.autopilot_write = True
                 self.lock_on = self.lock_on_in
                 self.theta = self.theta_in
