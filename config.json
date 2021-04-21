@@ -6,5 +6,7 @@
 "cam_width": 640,
 "cam_height": 480,
 "cam_input": 0,
-"input_check_frequency": 1.2
+"autopilot_update_frequency": 0.2,
+"logging":true,
+"input_check_frequency": 0.2
 }
