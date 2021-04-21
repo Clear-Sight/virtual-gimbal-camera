@@ -14,8 +14,8 @@ class Vehicle:
         self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
-        self.cached_attitude = {}
-        self.cached_gps = {}
+        self.cached_attitude = {"pitch":0, "yaw":0, "roll":0}
+        self.cached_gps = {"lat":0, "lon":0, "alt":0}
 
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
