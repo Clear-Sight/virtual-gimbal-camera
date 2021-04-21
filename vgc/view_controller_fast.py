@@ -139,6 +139,7 @@ class ViewController():
         Updates data from the auto pilot adapter.
         SETTER
         """
+        
         if not self.autopilot_write:
             print("New autopilot values: ", roll, yaw, pitch)
             self.autopilot_write = True
@@ -149,6 +150,8 @@ class ViewController():
                 self.d_height_in = height
             self.d_coordinate_in = (lon, lat)
             self.autopilot_write = False
+        else:
+            print("No values, but lock busy")
 
 
     def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
