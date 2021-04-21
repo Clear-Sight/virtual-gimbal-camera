@@ -14,13 +14,15 @@ class Vehicle:
         self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
-        
+        self.cached_gps_data = None
+
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
         return self.connection.recv_match(type ="ATTITUDE", blocking=True)
 
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
+        # BUG: is slow needs chaheing for preformence 
         return self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
 
     @property
