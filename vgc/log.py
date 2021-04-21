@@ -1,7 +1,13 @@
 import logging
 from .config import CONFIG
-import time
+from datetime import datetime
 def log_init():
     """ sets the configurations for logging """
-    logging.basicConfig(filename=f'vgc/.logs/example.log',
+
+    date = datetime.now().strftime("%m-%d-%Y")
+    if CONFIG["debug"]:
+        logging.basicConfig(filename=f'vgc/.logs/vgc-{date}.log',
+            filemode='w', level=logging.DEBUG)
+    else:
+        logging.basicConfig(filename=f'vgc/.logs/vgc-{date}.log',
             filemode='w', level=logging.INFO)
