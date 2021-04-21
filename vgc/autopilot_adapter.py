@@ -14,28 +14,14 @@ class Vehicle:
         self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
-        self.cached_attitude = {"pitch":0, "yaw":0, "roll":0}
-        self.cached_gps = {"lat":0, "lon":0, "alt":0}
-
+        
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
-        lis = None
-        lis = self.connection.recv_match(type ="ATTITUDE", blocking=True)
-        if lis == None:
-            lis = self.cached_attitude
-        else:
-             self.cached_attitude = lis
-        return lis
+        return self.connection.recv_match(type ="ATTITUDE", blocking=True)
 
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
-        lis = None
-        lis = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
-        if lis == None:
-            lis = self.cached_gps
-        else:
-             self.cached_gps = lis
-        return lis
+        return self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
 
     @property
     def pitch(self):
