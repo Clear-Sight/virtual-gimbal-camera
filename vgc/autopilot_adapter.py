@@ -79,4 +79,4 @@ class Vehicle:
                     roll=0, yaw=0,
                     pitch=0, height=0,
                     lon=0, lat=0)
-            time.sleep(CONFIG["autopilot_update_frequency"])
+            #time.sleep(CONFIG["autopilot_update_frequency"])
