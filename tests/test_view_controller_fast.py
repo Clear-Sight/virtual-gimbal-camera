@@ -265,6 +265,7 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     ax.scatter(VIEW_SIZE*cam_dir_final.item(0),
     VIEW_SIZE*cam_dir_final.item(1), VIEW_SIZE*cam_dir_final.item(2),
     marker = 'x')
+    print(vc.camera_roll)
 
     # Plot connection between drone and camera aim
     if not lock_on:
