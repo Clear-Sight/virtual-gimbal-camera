@@ -11,6 +11,7 @@ Functions in CameraFiler:
     handle_frame(self, frame, frame_width, frame_height,
                  out_width, out_height) - Crops and resizes a frame.
 """
+from .log import logger
 import threading
 import cv2
 
@@ -113,6 +114,7 @@ class CameraFilter:
                                             else config.CONFIG['cam_input'])
 
         if not cap.isOpened():
+            logger.error("no camera")
             raise ValueError("No camera")
 
         cnt = 0  # Initialize frame counter
@@ -142,6 +144,7 @@ class CameraFilter:
                 self.output_adapter.send(final_frame)
                 cv2.waitKey(1)
             except KeyboardInterrupt:
+                logger.info("stopped due to KeyboardInterrupt")
                 self.stopped = True
             self.semaphore.release()
 
