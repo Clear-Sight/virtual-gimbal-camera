@@ -18,12 +18,12 @@ phi_in
 lock_on (true/false)
 
 INPUT from autopilot_adapter.py
-(See the setter "update_fixhawk_input")
-d_roll
-d_yaw
-d_pitch
-d_height
-d_coordinate
+(See the setter "update_autopilot_input")
+d_roll_in
+d_yaw_in
+d_pitch_in
+d_height_in
+d_coordinate_in
 
 OUTPUT to cameraFilter.py
 (Called on in main)
@@ -56,7 +56,7 @@ class ViewController():
     fixed point.
 
     Functions in the class:
-    update_fixhawk_input()
+    update_autopilot_input()
     update_server_input()
     coordinate_to_point()
     point_to_coordinate()
