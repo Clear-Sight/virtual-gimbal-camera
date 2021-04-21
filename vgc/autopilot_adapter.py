@@ -71,7 +71,7 @@ class Vehicle:
             if CONFIG["local"]:
                 self.pipeline.autopilot_update(
                     roll=self.roll, yaw=self.yaw,
-                    pitch=self.pitch, height=self.height,
+                    pitch=self.pitch, height=self.altitude,
                     lon=self.longitude, lat=self.latitude)
             else:
                 # default values if not connected to a autopilot
