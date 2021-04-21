@@ -21,7 +21,7 @@ class Vehicle:
         """ Refreshes vehicle values """
         lis = None
         time.sleep(0.1)
-        lis = self.connection.recv_match(type ="ATTITUDE")
+        lis = self.connection.recv_match(type ="ATTITUDE", blocking=True)
         if lis == None:
             lis = self.cached_attitude
         else:
@@ -32,7 +32,7 @@ class Vehicle:
         """ Refreshes GPS data values """
         lis = None
         time.sleep(0.1)
-        lis = self.connection.recv_match(type ="GPS_RAW_INT")
+        lis = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
         if lis == None:
             lis = self.cached_gps
         else:
