@@ -254,7 +254,7 @@ class ViewController():
         """
         while True:
             if not self.autopilot_write:
-                print("Copying values for calculations...\n")
+                #print("Copying values for calculations...\n")
                 self.autopilot_write = True
                 self.lock_on = self.lock_on_in
                 self.theta = self.theta_in
