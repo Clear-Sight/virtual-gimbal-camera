@@ -20,7 +20,6 @@ class Vehicle:
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
         lis = None
-        time.sleep(0.1)
         lis = self.connection.recv_match(type ="ATTITUDE", blocking=True)
         if lis == None:
             lis = self.cached_attitude
@@ -31,7 +30,6 @@ class Vehicle:
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
         lis = None
-        time.sleep(0.1)
         lis = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
         if lis == None:
             lis = self.cached_gps
