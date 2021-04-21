@@ -18,16 +18,22 @@ class Vehicle:
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
         lis = None
+        cnt = 0
         while lis is None:
             #time.sleep(0.001)
+            cnt += 1
+            print(cnt)
             lis = self.connection.recv_match(type ="ATTITUDE")
         return lis
 
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
         lis = None
+        cnt = 0
         while lis is None:
             #time.sleep(0.001)
+            cnt += 1
+            print(cnt)
             lis = self.connection.recv_match(type ="GPS_RAW_INT")
         return lis
 
