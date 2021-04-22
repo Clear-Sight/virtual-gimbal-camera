@@ -13,6 +13,7 @@ Functions in CameraFiler:
 """
 import threading
 import cv2
+import numpy as np
 
 from .io import output_adapter
 from . import config
@@ -82,10 +83,10 @@ class CameraFilter:
         """
         self.semaphore.acquire()
 
-        self.camera_yaw  = camera_yaw
-        self.camera_pitch = camera_pitch
-        self.camera_zoom = camera_zoom
-        self.camera_roll = camera_roll
+        self.goal_camera_yaw  = camera_yaw
+        self.goal_camera_pitch = camera_pitch
+        self.goal_camera_zoom = camera_zoom
+        self.goal_camera_roll = camera_roll
 
         self.semaphore.release()
 
@@ -99,6 +100,7 @@ class CameraFilter:
         """Starts the Camerafilter."""
         # Set defaults
         self.camera_yaw , self.camera_pitch, self.camera_zoom, self.camera_roll = 0,0,4,0
+        self.goal_camera_yaw , self.goal_camera_pitch, self.goal_camera_zoom, self.goal_camera_roll = 0,0,4,0
         self.stopped = False
         self.camera_input = camera_input
 
@@ -134,6 +136,8 @@ class CameraFilter:
             ret, frame = cap.read()  # Capture frame by frames
             cnt += 1  # Counting the frames
 
+            self.update_values()
+
             # Avoid problems when video finish
 
             if not ret:
@@ -153,6 +157,13 @@ class CameraFilter:
 
 
         cv2.destroyAllWindows()
+
+    def update_values(self):
+        inverse_speed = 5
+        self.camera_yaw    += np.floor_divide(self.goal_camera_yaw - self.camera_yaw, inverse_speed)
+        self.camera_pitch  += np.divide(self.camera_pitch - self.camera_pitch, inverse_speed)
+        self.camera_zoom   += np.floor_divide(self.goal_camera_zoom - self.camera_zoom, inverse_speed)
+        self.camera_roll   += np.floor_divide(self.goal_camera_roll - self.camera_roll, inverse_speed)
 
     def handle_frame(self, frame, frame_width, frame_height,
                                     out_width, out_height):
