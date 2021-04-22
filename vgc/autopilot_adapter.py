@@ -24,9 +24,11 @@ class Vehicle:
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
         data = self.connection.recv_match(type ="GPS_RAW_INT")
+        if not data:
+            return
         if data and data.get_type() == "BAD_DATA":
             print(data)
-        if data.get_type() == "BAD_DATA" and mavutil.all_printable(data.data):
+        if data and data.get_type() == "BAD_DATA" and mavutil.all_printable(data.data):
                 sys.stdout.write(data.data)
                 sys.stdout.flush()
 
