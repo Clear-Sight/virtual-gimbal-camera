@@ -25,9 +25,9 @@ class Vehicle:
         data = self.connection.recv_match(type ="GPS_RAW_INT")
         if not data and self.cached_gps_data:
             data = self.cached_gps_data
-            # self.cached_gps_data = None # might over write data due to ref
+            self.cached_gps_data = None # might over write data due to ref
             return self.cached_gps_data
-        else:
+        elif not data and not self.cached_gps_data:
             data = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
         self.cached_gps_data = data
         return data
