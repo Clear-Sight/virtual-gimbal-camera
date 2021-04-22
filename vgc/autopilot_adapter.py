@@ -5,6 +5,7 @@ from .config import CONFIG
 import time
 from pymavlink import mavutil
 import threading
+import sys
 
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """
@@ -25,6 +26,10 @@ class Vehicle:
         data = self.connection.recv_match(type ="GPS_RAW_INT")
         if data and data.get_type() == "BAD_DATA":
             print(data)
+        if data.get_type() == "BAD_DATA" and mavutil.all_printable(data.data):
+                sys.stdout.write(data.data)
+                sys.stdout.flush()
+
         if not data and self.cached_gps_data:
             data = self.cached_gps_data
             self.cached_gps_data = None # might over write data due to ref
