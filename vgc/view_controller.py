@@ -82,6 +82,12 @@ class ViewController():
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True})
 
+        self.d_roll_in = 0
+        self.d_pitch_in = 0
+        self.d_yaw_in = 0
+        self.d_height_in = 0 # Height in meters above sea level
+        self.d_coordinate_in = (0, 0) # Longitude, latitude
+
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
@@ -91,14 +97,18 @@ class ViewController():
         # INPUT VARIABLES FROM WEB SERVER
         # Angles theta and phi are the spherical coordinates of where to look.
         # Theta = 0 means looking straight down, phi = 0 is looking north.
+        self.lock_on_in = False
         self.theta_in = 0
         self.phi_in = 0
+
         self.lock_on = False
+        self.theta = 0
+        self.phi = 0
         self.init_lock_on = False
 
         # INTERNAL VARIABLES
-        self.new_fixhawk_values = False
-        self.new_server_values = False
+        self.autopilot_write = False
+        self.server_write = False
         self.aim_coordinate = (0, 0) # Saved coordinate to center focus on
         self.phi_final = 0
         self.theta_final = 0 # Adjusted angle theta
@@ -127,28 +137,34 @@ class ViewController():
         """
         pass
 
-    def update_fixhawk_input(self, roll, yaw, pitch, height, lon, lat):
+    def update_autopilot_input(self, roll, yaw, pitch, height, lon, lat):
         """
         Updates data from the auto pilot adapter.
         SETTER
         """
-        if not self.new_fixhawk_values:
-            self.d_roll = np.rad2deg(roll)
-            self.d_pitch = np.rad2deg(pitch)
-            self.d_yaw = np.rad2deg(yaw)
+        
+        if not self.autopilot_write:
+            print("New autopilot values: ", roll, yaw, pitch)
+            self.autopilot_write = True
+            self.d_roll_in = np.rad2deg(roll)
+            self.d_pitch_in = np.rad2deg(pitch)
+            self.d_yaw_in = np.rad2deg(yaw)
             if height >= 0:
-                self.d_height = height
-            self.d_coordinate = (lon, lat)
-            self.new_fixhawk_values = True
+                self.d_height_in = height
+            self.d_coordinate_in = (lon, lat)
+            self.autopilot_write = False
+        else:
+            print("No values, but lock busy")
 
-    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2,):
+    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
         Updates data from user interface
         SETTER
         """
-        if not self.new_server_values:
+        if not self.server_write:
+            self.server_write = True
             if not lock_on:
-                if theta > 90:
+                if theta >= 90:
                     self.theta_in = 89
                     self.phi_in = phi
                 elif theta < 0:
@@ -157,12 +173,12 @@ class ViewController():
                 else:
                     self.theta_in = theta
                     self.phi_in = phi
-            if(lock_on is True and self.lock_on is False):
+            if(lock_on is True and self.lock_on_in is False):
                 self.init_lock_on = True
-            self.lock_on = lock_on
+            self.lock_on_in = lock_on
             if(zoom_in >= 2 and zoom_in <= 50):
                 self.camera_zoom = zoom_in
-            self.new_server_values = True
+            self.server_write = False
 
     def coordinate_to_point(self, coord1, coord2, height):
         """
@@ -223,38 +239,49 @@ class ViewController():
         the updated values.
         """
         while True:
-            if self.new_fixhawk_values or self.new_server_values:
-                self.new_fixhawk_values = True
-                self.new_server_values = True
-                if self.lock_on:
-                    if self.init_lock_on:
-                        self.aim_coordinate = self.point_to_coordinate(
-                            self.theta_in, self.phi_in,
-                            self.d_height, self.d_coordinate)
-                        self.init_lock_on = False
+            if not self.autopilot_write:
+                #print("Copying values for calculations...\n")
+                self.autopilot_write = True
+                self.lock_on = self.lock_on_in
+                self.theta = self.theta_in
+                self.phi = self.phi_in
+                self.autopilot_write = False
+            if not self.server_write:
+                self.server_write = True
+                self.d_roll = self.d_roll_in
+                self.d_pitch = self.d_pitch_in
+                self.d_yaw = self.d_yaw_in
+                self.d_height = self.d_height_in
+                self.d_coordinate = self.d_coordinate_in
+                self.server_write = False
 
-                    (theta_temp, phi_temp) = self.coordinate_to_point(
-                        self.d_coordinate, self.aim_coordinate, self.d_height)
-                    self.theta_final, self.phi_final = \
-                    self.adjust_aim(theta_temp, phi_temp)
-                    self.camera_pitch = np.sin(self.theta_final)
-                    self.camera_yaw = self.phi_final
-                    self.new_fixhawk_values = False
-                    self.new_server_values = False
-                else:
-                    self.theta_final, self.phi_final = \
-                    self.adjust_aim(self.theta_in, self.phi_in)
-                    self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
-                    self.camera_yaw = self.phi_final
-                    self.new_server_values = False
-                    self.new_fixhawk_values = False
-                self.camera_roll = self.d_roll
-                if not debug:
-                    self.pipeline.set_cropping(
-                        self.camera_yaw,
-                        self.camera_pitch,
-                        self.camera_roll,
-                        self.camera_zoom)
+            if self.lock_on:
+                if self.init_lock_on:
+                    self.aim_coordinate = self.point_to_coordinate(
+                        self.theta, self.phi,
+                        self.d_height, self.d_coordinate)
+                    self.init_lock_on = False
+
+                (theta_temp, phi_temp) = self.coordinate_to_point(
+                    self.d_coordinate, self.aim_coordinate, self.d_height)
+                self.theta_final, self.phi_final = \
+                self.adjust_aim(theta_temp, phi_temp)
+                self.camera_pitch = np.sin(self.theta_final)
+                self.camera_yaw = self.phi_final
+            else:
+                self.theta_final, self.phi_final = \
+                self.adjust_aim(self.theta, self.phi)
+                self.camera_pitch = np.sin(np.deg2rad(self.theta_final))
+                self.camera_yaw = self.phi_final
+            self.camera_roll = -self.d_roll*np.cos(np.deg2rad(self.phi_final))+\
+                -self.d_pitch*np.sin(np.deg2rad(self.phi_final))
+
+            if not debug:
+                self.pipeline.set_cropping(
+                    self.camera_yaw,
+                    self.camera_pitch,
+                    self.camera_roll,
+                    self.camera_zoom)
             if not is_threading:
                 break
 
