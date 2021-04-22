@@ -24,22 +24,12 @@ class Vehicle:
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
         data = self.connection.recv_match(type ="GPS_RAW_INT")
-        """if data and data.get_type() == "BAD_DATA":
-            print(data)
-        if data and data.get_type() == "BAD_DATA" and mavutil.all_printable(data.data):
-                sys.stdout.write(data.data)
-                sys.stdout.flush()
-        """
         if not data and self.cached_gps_data:
-            data = self.cached_gps_data
-            #self.cached_gps_data = None # might over write data due to ref
-            print(data)
             return self.cached_gps_data
         elif not data:
             data = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
         self.cached_gps_data = data
-        print(data)
-        return data
+        return self.cached_gps_data
 
 
     @property
