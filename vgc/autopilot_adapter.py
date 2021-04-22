@@ -32,7 +32,7 @@ class Vehicle:
         """
         if not data and self.cached_gps_data:
             data = self.cached_gps_data
-            self.cached_gps_data = None # might over write data due to ref
+            #self.cached_gps_data = None # might over write data due to ref
             print(data)
             return self.cached_gps_data
         elif not data:
