@@ -151,7 +151,7 @@ class ViewController():
             self.d_yaw_in = np.rad2deg(yaw)
             if height >= 0:
                 self.d_height_in = height
-            self.d_coordinate_in = (lon, lat)
+            self.d_coordinate_in = (lon / 10000000, lat / 10000000)
             self.autopilot_write = False
         else:
             print("No values, but lock busy")
