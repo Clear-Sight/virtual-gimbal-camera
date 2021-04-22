@@ -168,11 +168,12 @@ class CameraFilter:
         # Apply rotation matrix
         rotated_frame = cv2.warpAffine(frame, matrix,
                                         (frame_width, frame_height))
-        # Crop the frame
         relative_pitch = (frame_height/2 - (out_height/2)/self.camera_zoom)* self.camera_pitch
 
         matrix_roll = cv2.getRotationMatrix2D((frame_width/2, frame_height/2 - relative_pitch), self.camera_roll, 1)
         rotated_frame = cv2.warpAffine(rotated_frame, matrix_roll, (frame_width,frame_height))
+
+        # Crop the frame
 
         crop_frame = cv2.getRectSubPix(rotated_frame,
                                         (int(out_width/self.camera_zoom),
