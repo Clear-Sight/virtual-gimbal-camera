@@ -74,6 +74,7 @@ class Vehicle:
                     roll=self.roll, yaw=self.yaw,
                     pitch=self.pitch, height=self.altitude,
                     lon=self.longitude, lat=self.latitude)
+                print(self.altitude)
             else:
                 # default values if not connected to a autopilot
                 self.pipeline.autopilot_update(
