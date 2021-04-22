@@ -5,6 +5,7 @@ from .config import CONFIG
 import time
 from pymavlink import mavutil
 import threading
+import sys
 
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """
@@ -14,22 +15,22 @@ class Vehicle:
         self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
+        self.cached_gps_data = None
 
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
-        lis = None
-        while lis is None:
-            #time.sleep(0.001)
-            lis = self.connection.recv_match(type ="ATTITUDE")
-        return lis
+        return self.connection.recv_match(type ="ATTITUDE", blocking=True)
 
     def get_GPS_data_massage(self):
         """ Refreshes GPS data values """
-        lis = None
-        while lis is None:
-            #time.sleep(0.001)
-            lis = self.connection.recv_match(type ="GPS_RAW_INT")
-        return lis
+        data = self.connection.recv_match(type ="GPS_RAW_INT")
+        if not data and self.cached_gps_data:
+            return self.cached_gps_data
+        elif not data:
+            data = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
+        self.cached_gps_data = data
+        return self.cached_gps_data
+
 
     @property
     def pitch(self):
@@ -73,6 +74,7 @@ class Vehicle:
                     roll=self.roll, yaw=self.yaw,
                     pitch=self.pitch, height=self.altitude,
                     lon=self.longitude, lat=self.latitude)
+                print(self.altitude)
             else:
                 # default values if not connected to a autopilot
                 self.pipeline.autopilot_update(
