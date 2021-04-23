@@ -20,10 +20,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib import colors
 from vgc.view_controller_fast import ViewController
-from vgc.pipeline import Pipeline
+#from vgc.pipeline import Pipeline
 import threading
 
-vc = Pipeline().view_controller
+vc = ViewController(0)
 
 SIZE = 200
 VIEW_SIZE = 50

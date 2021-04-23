@@ -280,7 +280,7 @@ class ViewController():
                     self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
                 self.adjust_aim(theta_temp, phi_temp)
-                self.camera_pitch = tf.sin(self.theta_final)
+                self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
                 self.camera_yaw = self.phi_final
             else:
                 self.theta_final, self.phi_final = \
