@@ -205,7 +205,7 @@ class ViewController():
         else:
             phi = np.arctan2(x_diff, y_diff)
         theta_2 = tf.arctan((((x_diff**2) + (y_diff**2))**0.5) / height)
-        return self.rad2deg(theta_2), (self.rad2deg(phi) + 360) % 360
+        return self.rad2deg(theta_2), self.rad2deg(phi) % 360
 
     def point_to_coordinate(self, theta, phi, height, d_coord):
         """
@@ -268,11 +268,13 @@ class ViewController():
 
             if self.lock_on:
                 if self.init_lock_on:
+                    #Phi = 0 ska ge samma latitud, och en annan longitud
+                    #Logga när denna kod körs, med long, lat
                     self.aim_coordinate = self.point_to_coordinate(
                         self.theta, self.phi,
                         self.d_height, self.d_coordinate)
                     self.init_lock_on = False
-
+                #När vi står stilla ska temp vara samma som initiala vinklar
                 (theta_temp, phi_temp) = self.coordinate_to_point(
                     self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
