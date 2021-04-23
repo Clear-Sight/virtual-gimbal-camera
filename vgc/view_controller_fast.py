@@ -141,7 +141,7 @@ class ViewController():
         """
         
         if not self.autopilot_write:
-            print("New autopilot values: ", roll, yaw, pitch)
+            #print("New autopilot values: ", roll, yaw, pitch)
             self.autopilot_write = True
             self.d_roll_in = self.rad2deg(roll)
             self.d_pitch_in = self.rad2deg(pitch)
@@ -150,9 +150,6 @@ class ViewController():
                 self.d_height_in = height
             self.d_coordinate_in = (lon / 10000000, lat / 10000000)
             self.autopilot_write = False
-        else:
-            print("No values, but lock busy")
-
 
     def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
