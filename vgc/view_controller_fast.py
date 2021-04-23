@@ -253,21 +253,21 @@ class ViewController():
         the updated values.
         """
         while True:
-            if not self.autopilot_write:
+            if not self.server_write:
                 #print("Copying values for calculations...\n")
-                self.autopilot_write = True
+                self.server_write = True
                 self.lock_on = self.lock_on_in
                 self.theta = self.theta_in
                 self.phi = self.phi_in
-                self.autopilot_write = False
-            if not self.server_write:
-                self.server_write = True
+                self.server_write = False
+            if not self.autopilot_write:
+                self.autopilot_write = True
                 self.d_roll = self.d_roll_in
                 self.d_pitch = self.d_pitch_in
                 self.d_yaw = self.d_yaw_in
                 self.d_height = self.d_height_in
                 self.d_coordinate = self.d_coordinate_in
-                self.server_write = False
+                self.autopilot_write = False
 
             if self.lock_on:
                 if self.init_lock_on:
