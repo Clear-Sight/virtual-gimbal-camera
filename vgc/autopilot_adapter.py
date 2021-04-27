@@ -35,32 +35,32 @@ class Vehicle:
     @property
     def pitch(self):
         """ Get vehicle pitch """
-        return float(self.get_attitude_massage().pitch)
+        return float(round(self.get_attitude_massage().pitch,3))
 
     @property
     def yaw(self):
         """ Get vehicle yaw """
-        return float(self.get_attitude_massage().yaw)
+        return float(round(self.get_attitude_massage().yaw,3))
 
     @property
     def roll(self):
         """ Get vehicle roll """
-        return float(self.get_attitude_massage().roll)
+        return float(round(self.get_attitude_massage().roll,3))
 
     @property
     def latitude(self):
         """ Get vehicle latitude """
-        return float(self.get_GPS_data_massage().lat)
+        return float(self.get_GPS_data_massage().lat / 10000000)
 
     @property
     def longitude(self):
         """ Get vehicle longitude """
-        return float(self.get_GPS_data_massage().lon)
+        return float(self.get_GPS_data_massage().lon / 10000000)
 
     @property
     def altitude(self):
         """ Get vehicle altitude """
-        return float(self.get_GPS_data_massage().alt)
+        return float(self.get_GPS_data_massage().alt / 1000)
 
     def start(self):
         """ thread starting funciton """
