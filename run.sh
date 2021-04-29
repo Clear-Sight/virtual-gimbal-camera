@@ -1,1 +1,1 @@
-python3 -m vgc
+sudo python3 -m vgc

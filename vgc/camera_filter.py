@@ -116,7 +116,7 @@ class CameraFilter:
         """
         cap = cv2.VideoCapture(self.camera_input if self.camera_input
                                             else config.CONFIG['cam_input'])
-
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 2)
         if not cap.isOpened():
             logger.error("no camera")
             raise ValueError("No camera")

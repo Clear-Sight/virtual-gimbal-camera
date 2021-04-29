@@ -77,18 +77,19 @@ class ViewController():
         """
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True, 'debug':False})
+        self.thread = threading.Thread(target=self.main,
+                   kwargs={'is_threading': True, 'debug':False})
 
         self.d_roll_in = 0
         self.d_pitch_in = 0
         self.d_yaw_in = 0
-        self.d_height_in = 0 # Height in meters above sea level
+        self.d_height_in = 1 # Height in meters above sea level
         self.d_coordinate_in = (0, 0) # Longitude, latitude
 
         self.d_roll = 0
         self.d_pitch = 0
         self.d_yaw = 0
-        self.d_height = 0 # Height in meters above sea level
+        self.d_height = 1 # Height in meters above sea level
         self.d_coordinate = (0, 0) # Longitude, latitude
 
         # INPUT VARIABLES FROM WEB SERVER
@@ -139,17 +140,16 @@ class ViewController():
         Updates data from the auto pilot adapter.
         SETTER
         """
-        
         if not self.autopilot_write:
-            #print("New autopilot values: ", roll, yaw, pitch)
             self.autopilot_write = True
             self.d_roll_in = self.rad2deg(roll)
             self.d_pitch_in = self.rad2deg(pitch)
             self.d_yaw_in = self.rad2deg(yaw)
             if height >= 0:
                 self.d_height_in = height
-            self.d_coordinate_in = (lon / 10000000, lat / 10000000)
+            self.d_coordinate_in = (lon, lat)
             self.autopilot_write = False
+
 
     def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
@@ -158,6 +158,7 @@ class ViewController():
         """
         if not self.server_write:
             self.server_write = True
+
             if not lock_on:
                 if theta >= 90:
                     self.theta_in = 89
@@ -198,8 +199,10 @@ class ViewController():
         point in its angular form(theta, phi). Used in lock-on mode.
         """
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
-        x_diff = tf.tan(self.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
-        y_diff = tf.tan(self.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
+        x_diff = tf.tan(self.deg2rad(coord_diff[0])) * \
+                 self.earth_radius_at_lat(coord1[1])
+        y_diff = tf.tan(self.deg2rad(coord_diff[1])) * \
+                 self.earth_radius_at_lat(coord1[1])
         if(x_diff == 0 and y_diff == 0):
             phi = 0
         else:
@@ -218,10 +221,10 @@ class ViewController():
         """
         p_lat = self.deg2rad(d_coord[1]) +\
             tf.arctan((height * tf.tan(self.deg2rad(theta))*\
-            tf.sin(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+            tf.cos(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
         p_long = self.deg2rad(d_coord[0]) +\
             tf.arctan((height * tf.tan(self.deg2rad(theta))*\
-            tf.cos(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
+            tf.sin(self.deg2rad(phi))) / self.earth_radius_at_lat(d_coord[1]))
         return self.rad2deg(p_long), self.rad2deg(p_lat)
 
     def adjust_aim(self, theta, phi):
@@ -251,7 +254,6 @@ class ViewController():
         """
         while True:
             if not self.server_write:
-                #print("Copying values for calculations...\n")
                 self.server_write = True
                 self.lock_on = self.lock_on_in
                 self.theta = self.theta_in

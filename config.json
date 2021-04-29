@@ -1,6 +1,6 @@
 {
-"input_domain": "192.168.1.152:24474",
-"output_domain": "192.168.1.152:7777",
+"input_domain": "178.174.148.6:24474",
+"output_domain": "178.174.148.6:7777",
 "debug": false,
 "local": true,
 "cam_width": 640,
