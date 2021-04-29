@@ -1,6 +1,12 @@
+"""
+input adapter contains class InputAdapter
+that featches messages from server
+"""
+
 import threading
+import time
 import requests
-import time 
+
 from ..config import CONFIG
 
 class InputAdapter:
@@ -25,11 +31,11 @@ class InputAdapter:
 
     def get_usr_input(self):
         """ Fetch user input from web server via GET request. """
-        r = requests.get(
+        req = requests.get(
             f'http://{CONFIG["input_domain"]}/drone/user/fetch')
         self.usr_msg = self.DEFAULT_USR_MSG
-        if r.ok:
-            self.usr_msg = r.json()
+        if req.ok:
+            self.usr_msg = req.json()
         return self.usr_msg
 
     def push(self):
