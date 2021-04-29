@@ -140,7 +140,6 @@ class ViewController():
         Updates data from the auto pilot adapter.
         SETTER
         """
-
         if not self.autopilot_write:
             self.autopilot_write = True
             self.d_roll_in = self.rad2deg(roll)
@@ -151,6 +150,7 @@ class ViewController():
             self.d_coordinate_in = (lon, lat)
             self.autopilot_write = False
 
+
     def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
         """
         Updates data from user interface
@@ -158,6 +158,7 @@ class ViewController():
         """
         if not self.server_write:
             self.server_write = True
+
             if not lock_on:
                 if theta >= 90:
                     self.theta_in = 89

@@ -1,3 +1,4 @@
+
 from .log import logger
 from .camera_filter import CameraFilter
 from .view_controller_fast import ViewController
@@ -42,7 +43,6 @@ class Pipeline:
         logger.debug(f"set cropping: yaw {camera_yaw}, pitch {camera_pitch}, zoom {camera_zoom}")
         self.camera_filter.update(camera_yaw=camera_yaw,
         camera_pitch=camera_pitch, camera_roll=camera_roll, camera_zoom=camera_zoom)
-
 
     def push_usr_msg(self, usr_msg):
         """
