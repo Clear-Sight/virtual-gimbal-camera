@@ -49,8 +49,7 @@ def tan(x):
     """
     if x < 0:
         return -tf.tan_t(c_float(-x)) / SCALE
-    else:
-        return tf.tan_t(c_float(x)) / SCALE
+    return tf.tan_t(c_float(x)) / SCALE
 
 def arctan(x):
     """
@@ -59,8 +58,7 @@ def arctan(x):
     """
     if x < 0:
         return -tf.arctan_t_2(c_float(-x)) / SCALE
-    else:
-        return tf.arctan_t_2(c_float(x)) / SCALE
+    return tf.arctan_t_2(c_float(x)) / SCALE
 
 def arccos(x):
     """
