@@ -12,7 +12,8 @@ class Vehicle:
 
     def __init__(self, pipeline):
         """ Initiates connection """
-        self.connection = mavutil.mavlink_connection("/dev/ttyS0", 97600)
+        if not config.CONFIG['local']:
+            self.connection = mavutil.mavlink_connection("/dev/ttyS0", 97600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
         self.cached_gps_data = [58.391675, 15.591384, 75]

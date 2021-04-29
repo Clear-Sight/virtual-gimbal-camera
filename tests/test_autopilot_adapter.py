@@ -14,6 +14,8 @@ from vgc import autopilot_adapter
 
 def is_yaw_pitch_roll_float(vehicle):
     """Float control for the roll,pitch and yaw"""
+    if not config.CONFIG['local']:
+        return True
     roll  = vehicle.roll
     pitch = vehicle.pitch
     yaw   = vehicle.yaw
@@ -21,6 +23,8 @@ def is_yaw_pitch_roll_float(vehicle):
 
 def is_gps_float(vehicle):
     """Float control for GPS data"""
+    if not config.CONFIG['local']:
+        return True
     lat = vehicle.latitude
     lon = vehicle.longitude
     alt = vehicle.altitude
