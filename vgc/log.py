@@ -1,7 +1,12 @@
+"""
+ this module keeps the loggers for
+ vgc and saves them to the .logs folder
+"""
+
 import logging
-import os
-from .config import CONFIG
 from datetime import datetime
+import os
+
 
 
 date = datetime.now().strftime("%m-%d-%Y")
