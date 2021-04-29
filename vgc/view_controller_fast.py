@@ -77,7 +77,8 @@ class ViewController():
         """
         #Threading parameters, need pipeline in init
         self.pipeline = pipeline
-        self.thread = threading.Thread(target=self.main, kwargs={'is_threading': True, 'debug':False})
+        self.thread = threading.Thread(target=self.main,
+                   kwargs={'is_threading': True, 'debug':False})
 
         self.d_roll_in = 0
         self.d_pitch_in = 0
@@ -139,9 +140,8 @@ class ViewController():
         Updates data from the auto pilot adapter.
         SETTER
         """
-        
+
         if not self.autopilot_write:
-            print("New autopilot values: ", lat, lon, height)
             self.autopilot_write = True
             self.d_roll_in = self.rad2deg(roll)
             self.d_pitch_in = self.rad2deg(pitch)
@@ -198,8 +198,10 @@ class ViewController():
         point in its angular form(theta, phi). Used in lock-on mode.
         """
         coord_diff = (coord2[0] - coord1[0], coord2[1] - coord1[1])
-        x_diff = tf.tan(self.deg2rad(coord_diff[0])) * self.earth_radius_at_lat(coord1[1])
-        y_diff = tf.tan(self.deg2rad(coord_diff[1])) * self.earth_radius_at_lat(coord1[1])
+        x_diff = tf.tan(self.deg2rad(coord_diff[0])) * \
+                 self.earth_radius_at_lat(coord1[1])
+        y_diff = tf.tan(self.deg2rad(coord_diff[1])) * \
+                 self.earth_radius_at_lat(coord1[1])
         if(x_diff == 0 and y_diff == 0):
             phi = 0
         else:
@@ -251,7 +253,6 @@ class ViewController():
         """
         while True:
             if not self.server_write:
-                #print("Copying values for calculations...\n")
                 self.server_write = True
                 self.lock_on = self.lock_on_in
                 self.theta = self.theta_in
@@ -274,7 +275,6 @@ class ViewController():
                         self.theta, self.phi,
                         self.d_height, self.d_coordinate)
                     self.init_lock_on = False
-                    print("Aiming: ", self.aim_coordinate)
                 #När vi står stilla ska temp vara samma som initiala vinklar
                 (theta_temp, phi_temp) = self.coordinate_to_point(
                     self.d_coordinate, self.aim_coordinate, self.d_height)

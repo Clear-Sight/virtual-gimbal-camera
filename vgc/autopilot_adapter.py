@@ -1,21 +1,21 @@
 """
 Software interface for the autopilot
 """
-from .config import CONFIG
 import time
-from pymavlink import mavutil
 import threading
 import sys
+from pymavlink import mavutil
+from .config import CONFIG
 
 class Vehicle:
     """ Class Vehicle represents the autopilot as vehicle. """
 
     def __init__(self, pipeline):
         """ Initiates connection """
-        self.connection = mavutil.mavlink_connection("/dev/ttyAMA0", 57600)
+        self.connection = mavutil.mavlink_connection("/dev/ttyS0", 97600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
-        self.cached_gps_data = None
+        self.cached_gps_data = [58.391675, 15.591384, 75]
 
     def get_attitude_massage(self):
         """ Refreshes vehicle values """
@@ -27,8 +27,10 @@ class Vehicle:
         if not data and self.cached_gps_data:
             return self.cached_gps_data
         elif not data:
-            data = self.connection.recv_match(type ="GPS_RAW_INT", blocking=True)
-        self.cached_gps_data = data
+            data = self.connection.recv_match(type =
+                  "GPS_RAW_INT", blocking=False)
+        self.cached_gps_data = [data.lat/10000000,
+                    data.lon/10000000, data.alt/1000]
         return self.cached_gps_data
 
 
@@ -40,6 +42,7 @@ class Vehicle:
     @property
     def yaw(self):
         """ Get vehicle yaw """
+        print(self.get_attitude_massage().yaw)
         return float(round(self.get_attitude_massage().yaw,3))
 
     @property
@@ -50,17 +53,17 @@ class Vehicle:
     @property
     def latitude(self):
         """ Get vehicle latitude """
-        return float(self.get_GPS_data_massage().lat / 10000000)
+        return float(self.get_GPS_data_massage()[0])
 
     @property
     def longitude(self):
         """ Get vehicle longitude """
-        return float(self.get_GPS_data_massage().lon / 10000000)
+        return float(self.get_GPS_data_massage()[1])
 
     @property
     def altitude(self):
         """ Get vehicle altitude """
-        return float(self.get_GPS_data_massage().alt / 1000)
+        return float(self.get_GPS_data_massage()[2])
 
     def start(self):
         """ thread starting funciton """
