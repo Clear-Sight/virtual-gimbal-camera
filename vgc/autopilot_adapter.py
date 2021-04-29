@@ -1,9 +1,7 @@
 """
 Software interface for the autopilot
 """
-import time
 import threading
-import sys
 from pymavlink import mavutil
 from .config import CONFIG
 
@@ -12,7 +10,7 @@ class Vehicle:
 
     def __init__(self, pipeline):
         """ Initiates connection """
-        if not config.CONFIG['local']:
+        if not CONFIG['local']:
             self.connection = mavutil.mavlink_connection("/dev/ttyS0", 97600)
         self.thread = threading.Thread(target=self.main)
         self.pipeline = pipeline
