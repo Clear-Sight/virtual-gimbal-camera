@@ -21,7 +21,7 @@ class OutputAdapter:
 
     def send(self, frame):
         """ sends a frame to the set domain in CONFIG """
-        encoded, buf = cv2.imencode('.jpg', frame)
+        buf = cv2.imencode('.jpg', frame)[1]
         image = base64.b64encode(buf)
         self.socket.send(image)
 
