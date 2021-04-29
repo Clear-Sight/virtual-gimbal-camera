@@ -1,4 +1,7 @@
-
+"""
+Class Pipeline which initializes modules and works
+as a middle hand for communication.
+"""
 from .log import logger
 from .camera_filter import CameraFilter
 from .view_controller_fast import ViewController
@@ -6,18 +9,28 @@ from .io.input_adapter import InputAdapter
 from .autopilot_adapter import Vehicle
 from .config import CONFIG
 
+# pylint: disable=logging-fstring-interpolation
+# Don't really know what this is, but the part of the code
+# where pylint is angry works perfectly.
+
 class Pipeline:
     """"
     Cross thread messaging pipeline.
     Threads communicates by calling pipeline's
     class functions
 
-    __init__(self):
+    __init__(self) --
         Initializes the different modules
-    start(self):
+    start(self) --
         Starts all the threads
-
-
+    set_cropping(self, camera_yaw, camera_pitch, camera_roll, camera_zoom) --
+        Sets the point for the filter to crop out, called from ViewController
+    push_usr_msg(self, usr_msg) --
+        Updates view_controller with the user message
+        from input_adapter to view_controller.
+    autopilot_update(self, roll, yaw, pitch, height, lon, lat) --
+        Updates view_controller with the values
+        from autopilot to view_controller.
     """
 
     def __init__(self):
@@ -38,11 +51,14 @@ class Pipeline:
             self.autopilot.start()
 
 
-    def set_cropping(self, camera_yaw, camera_pitch, camera_roll, camera_zoom=2):
-        """" Sets the point for the filter to crop out """
-        logger.debug(f"set cropping: yaw {camera_yaw}, pitch {camera_pitch}, zoom {camera_zoom}")
+    def set_cropping(self, camera_yaw, camera_pitch, camera_roll,\
+        camera_zoom=2):
+        """ Sets the point for the filter to crop out """
+        logger.debug(f"set cropping: yaw {camera_yaw}, pitch {camera_pitch},\
+            zoom {camera_zoom}")
         self.camera_filter.update(camera_yaw=camera_yaw,
-        camera_pitch=camera_pitch, camera_roll=camera_roll, camera_zoom=camera_zoom)
+        camera_pitch=camera_pitch, camera_roll=camera_roll,\
+            camera_zoom=camera_zoom)
 
     def push_usr_msg(self, usr_msg):
         """
