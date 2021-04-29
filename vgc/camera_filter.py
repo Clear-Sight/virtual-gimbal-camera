@@ -16,7 +16,11 @@ import cv2
 from .log import logger
 from .io import output_adapter
 from . import config
+# pylint: disable=no-member
+# error with import cv2
 
+# pylint: disable=too-many-instance-attributes
+# handle_frame need 6 arguments
 
 class CameraFilter:
     """Filters a video stream.
