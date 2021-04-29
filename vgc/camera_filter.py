@@ -20,6 +20,7 @@ from . import config
 # error with import cv2
 
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-arguments
 # handle_frame need 6 arguments
 
 class CameraFilter:

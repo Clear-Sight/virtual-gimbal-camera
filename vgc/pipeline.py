@@ -13,6 +13,9 @@ from .config import CONFIG
 # Don't really know what this is, but the part of the code
 # where pylint is angry works perfectly.
 
+# pylint: disable=too-many-arguments
+# 6 arguments are needed.
+
 class Pipeline:
     """"
     Cross thread messaging pipeline.
