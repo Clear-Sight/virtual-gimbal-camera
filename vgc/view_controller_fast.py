@@ -39,10 +39,13 @@ camera_zoom
 # 16 is needed for the ViewController class.
 
 # pylint: disable=invalid-name
-# ViewController is a valid fucking name, fuck off
+# ViewController is a valid name.
 
 # pylint: disable=too-many-arguments
 # 7 arguments is needed for this function.
+
+# pylint: disable=chained-comparison
+# The comparison which pylint wants changed is set that way for safety.
 import threading
 import numpy as np
 import vgc.taylor_math_functions as tf
@@ -127,14 +130,6 @@ class ViewController():
         """
         self.thread.start()
 
-
-    def main_thread(self):
-        """
-        Main for thread, changed name due to conflict
-        with other main-method.
-        """
-        pass
-
     def update_autopilot_input(self, roll, yaw, pitch, height, lon, lat):
         """
         Updates data from the auto pilot adapter.
@@ -151,7 +146,8 @@ class ViewController():
             self.autopilot_write = False
 
 
-    def update_server_input(self, theta = 0, phi = 0, lock_on = False, zoom_in = 2):
+    def update_server_input(self, theta = 0, phi = 0,
+                            lock_on = False, zoom_in = 2):
         """
         Updates data from user interface
         SETTER
@@ -288,8 +284,9 @@ class ViewController():
                 self.adjust_aim(self.theta, self.phi)
                 self.camera_pitch = tf.sin(self.deg2rad(self.theta_final))
                 self.camera_yaw = self.phi_final
-            self.camera_roll = -self.d_roll*tf.cos(self.deg2rad(self.phi_final))+\
-                -self.d_pitch*tf.sin(self.deg2rad(self.phi_final))
+            self.camera_roll = -self.d_roll*tf.cos(self.deg2rad(\
+                self.phi_final))-self.d_pitch*tf.sin(self.deg2rad(\
+                    self.phi_final))
 
             if not debug:
                 self.pipeline.set_cropping(
