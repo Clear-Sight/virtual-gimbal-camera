@@ -23,11 +23,11 @@ class Pipeline:
     class functions
 
     __init__(self) --
-        Initializes the different modules
+        Initializes the classes from the different modules
     start(self) --
-        Starts all the threads
+        For starting all the threads
     set_cropping(self, camera_yaw, camera_pitch, camera_roll, camera_zoom) --
-        Sets the point for the filter to crop out, called from ViewController
+        For setting the point for the filter to crop out, called from ViewController
     push_usr_msg(self, usr_msg) --
         Updates view_controller with the user message
         from input_adapter to view_controller.
