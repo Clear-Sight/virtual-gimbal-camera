@@ -83,6 +83,8 @@ class ViewController():
         self.thread = threading.Thread(target=self.main,
                    kwargs={'is_threading': True, 'debug':False})
 
+        self.DEG_IN_RED = 0.0174532925
+
         self.d_roll_in = 0
         self.d_pitch_in = 0
         self.d_yaw_in = 0
@@ -117,7 +119,7 @@ class ViewController():
         # OUTPUT VARIABLES
         # These variables reflect where on the image feeded from the camera
         # we wish to look. If, say, we want to look north and in a 45-degree
-        # angle and the drone has yawed right by 30 degrees, our camera_yaw
+        # angle and the drone has yawed right by 30 degrees, the systems camera_yaw
         # would be -30 degrees and camera_pitch is -45 degrees.
         self.camera_roll = 0
         self.camera_yaw = 0
@@ -177,13 +179,13 @@ class ViewController():
         """
         Translates a given angle in degrees to radians.
         """
-        return 0.0174532925 * degrees
+        return self.DEG_IN_RED * degrees
 
     def rad2deg(self, radians):
         """
         Translates a given angle in radians to degrees.
         """
-        return radians / 0.0174532925
+        return radians / self.DEG_IN_RED
 
     def coordinate_to_point(self, coord1, coord2, height):
         """
@@ -210,10 +212,10 @@ class ViewController():
         """
         Calculates the coordinate existent at the center of view.
 
-        Argument theta and phi represent our aim, height is our
-        height from sea level and d_coord is the drone's current
-        coordinate. Thisfunction is used when lock_on mode first is
-        initialized.
+        Argument theta and phi represent the systems aim, height is 
+        the systems height from sea level and d_coord is the drone's 
+        current coordinate. Thisfunction is used when lock_on mode 
+        first is initialized.
         """
         p_lat = self.deg2rad(d_coord[1]) +\
             tf.arctan((height * tf.tan(self.deg2rad(theta))*\
@@ -242,9 +244,9 @@ class ViewController():
 
     def main(self, is_threading=False, debug=True):
         """
-        Main-function that runs all the time and updates our view
-        angle. Other components simply call the setter functions and
-        then waits for the main-function to update  where we are
+        Main-function that runs all the time and updates the systems 
+        view angle. Other components simply call the setter functions 
+        and then waits for the main-function to update  where we are
         looking. Then you can call the getter-function to recieve
         the updated values.
         """
@@ -266,13 +268,10 @@ class ViewController():
 
             if self.lock_on:
                 if self.init_lock_on:
-                    #Phi = 0 ska ge samma latitud, och en annan longitud
-                    #Logga när denna kod körs, med long, lat
                     self.aim_coordinate = self.point_to_coordinate(
                         self.theta, self.phi,
                         self.d_height, self.d_coordinate)
                     self.init_lock_on = False
-                #När vi står stilla ska temp vara samma som initiala vinklar
                 (theta_temp, phi_temp) = self.coordinate_to_point(
                     self.d_coordinate, self.aim_coordinate, self.d_height)
                 self.theta_final, self.phi_final = \
