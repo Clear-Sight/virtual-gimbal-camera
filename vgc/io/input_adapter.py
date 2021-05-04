@@ -6,7 +6,7 @@ that featches messages from server
 import threading
 import time
 import requests
-from .log import logger
+from ..log import logger
 from ..config import CONFIG
 
 class InputAdapter:
@@ -34,7 +34,7 @@ class InputAdapter:
         self.usr_msg = self.DEFAULT_USR_MSG
         try:
             req = requests.get(
-                f'http://{CONFIG["input_domain"]}/drone/user/fetch')    
+                f'http://{CONFIG["input_domain"]}/drone/user/fetch')
         except HTTPError as http_err:
             logger.error(f'HTTP error occurred: {http_err}')
         except Exception as err:
