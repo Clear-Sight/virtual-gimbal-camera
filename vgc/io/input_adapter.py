@@ -6,6 +6,7 @@ that featches messages from server
 import threading
 import time
 import requests
+from requests.exceptions import HTTPError
 from ..log import logger
 from ..config import CONFIG
 
@@ -18,9 +19,9 @@ class InputAdapter:
     def __init__(self, pipeline):
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
-        self.DEFAULT_USR_MSG = {"compass":0.0, "angle":0.0,
+        self.DEFAULT_USR_MSG = {"compass":0.0, "angle":0.0,\
                                 "zoom":2,"lock_on":False}
-        self.usr_msg = {"compass":0.0, "angle":0.0,
+        self.usr_msg = {"compass":0.0, "angle":0.0,\
                             "zoom":2,"lock_on":False}
         self.cached_usr_msg = {}
 
@@ -41,6 +42,9 @@ class InputAdapter:
             logger.error(f'Other error occurred: {err}')
         else:
             self.usr_msg = req.json()
+        if list(self.usr_msg.keys()) != list(self.DEFAULT_USR_MSG.keys()):
+            logger.error(f'bad usr msg keys:{list(self.usr_msg.keys())}')
+            self.usr_msg = self.DEFAULT_USR_MSG
         return self.usr_msg
 
     def push(self):
