@@ -1,10 +1,13 @@
-from ..config import CONFIG
+"""
+input adapter contains class InputAdapter
+that featches messages from server
+"""
+
 import threading
-import zmq
-import json
 import time
-import uuid
 import requests
+
+from ..config import CONFIG
 
 class InputAdapter:
     """
@@ -15,8 +18,10 @@ class InputAdapter:
     def __init__(self, pipeline):
         self.pipeline = pipeline
         self.thread = threading.Thread(target=self.main)
-        self.DEFAULT_USR_MSG = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
-        self.usr_msg = {"compass":0.0, "angle":90.0, "zoom":2,"lock_on":False}
+        self.DEFAULT_USR_MSG = {"compass":0.0, "angle":0.0,
+                                "zoom":2,"lock_on":False}
+        self.usr_msg = {"compass":0.0, "angle":0.0,
+                            "zoom":2,"lock_on":False}
         self.cached_usr_msg = {}
 
     def start(self):
@@ -26,12 +31,12 @@ class InputAdapter:
 
     def get_usr_input(self):
         """ Fetch user input from web server via GET request. """
-        r = requests.get(
+        req = requests.get(
             f'http://{CONFIG["input_domain"]}/drone/user/fetch')
-        if not r.ok:
-            return self.DEFAULT_USR_MSG
-        else:
-            return r.json()
+        self.usr_msg = self.DEFAULT_USR_MSG
+        if req.ok:
+            self.usr_msg = req.json()
+        return self.usr_msg
 
     def push(self):
         """
@@ -47,4 +52,5 @@ class InputAdapter:
             if self.usr_msg != self.cached_usr_msg:
                 self.cached_usr_msg = self.usr_msg
                 self.push()
-            time.sleep(CONFIG["input_check_frequency"]) # maybe should be something better
+            time.sleep(CONFIG["input_check_frequency"])
+            # maybe should be something better

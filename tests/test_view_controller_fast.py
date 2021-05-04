@@ -17,11 +17,13 @@ which executes all the different testfunctions.
 # Also, 9 arguments for function "plot" is necessary.
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib import colors
 from vgc.view_controller_fast import ViewController
-from vgc.pipeline import Pipeline
+#from vgc.pipeline import Pipeline
 import threading
 
-vc = Pipeline().view_controller
+vc = ViewController(0)
 
 SIZE = 200
 VIEW_SIZE = 50
@@ -82,7 +84,7 @@ def get_camera_angle_when_pitch(pitch):
     behaves accordingly if the drone pitches.
     """
     pitch = np.deg2rad(pitch)
-    vc.update_fixhawk_input(0, 0, pitch, 0, 0, 0)
+    vc.update_autopilot_input(0, 0, pitch, 0, 0, 0)
     vc.update_server_input(0, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
@@ -93,7 +95,7 @@ def get_camera_angle_when_yaw(yaw):
     behaves accordingly if the drone yaws.
     """
     yaw = np.deg2rad(yaw)
-    vc.update_fixhawk_input(0, yaw, 0, 0, 0, 0)
+    vc.update_autopilot_input(0, yaw, 0, 0, 0, 0)
     vc.update_server_input(45, 0)
     vc.main()
     return(vc.theta_final, vc.phi_final)
@@ -104,7 +106,7 @@ def get_camera_angle_when_roll(roll):
     behaves accordingly if the drone rolls.
     """
     roll = np.deg2rad(roll)
-    vc.update_fixhawk_input(roll, 0, 0, 0, 0, 0)
+    vc.update_autopilot_input(roll, 0, 0, 0, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return (vc.theta_final, vc.phi_final)
@@ -114,7 +116,7 @@ def get_inappropriate_theta(theta):
     This function tests that different
     thetas and checks if they are set correctly.
     """
-    vc.update_fixhawk_input(0, 0, 0, 0, 0, 0)
+    vc.update_autopilot_input(0, 0, 0, 0, 0, 0)
     vc.update_server_input(theta, 0, False)
     vc.main()
     return vc.theta_in < 90 and vc.theta_in >= 0
@@ -124,7 +126,7 @@ def get_inappropriate_height(height):
     This function tests different heights
     and checks if they are set correctly.
     """
-    vc.update_fixhawk_input(0, 0, 0, height, 0, 0)
+    vc.update_autopilot_input(0, 0, 0, height, 0, 0)
     vc.update_server_input(45, 90, False)
     vc.main()
     return vc.d_height >= 0 and vc.d_height < 10000
@@ -135,7 +137,7 @@ def get_target_coordinate(coord):
     tries to move to another point. This should not be possible
     since we looked on a specific coordinat.
     """
-    vc.update_fixhawk_input(0, 0, 0, 100, coord[0], coord[1])
+    vc.update_autopilot_input(0, 0, 0, 100, coord[0], coord[1])
     vc.update_server_input(0, 180, False)
     vc.main()
     vc.update_server_input(25, 25, True)
@@ -149,15 +151,14 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     camera is aiming and blue triangle is the coordinate it focuses on,
     if lock_on is true.
     """
-    d_long = 15
-    d_lat = 15
+    d_long = vc.d_coordinate[0]
+    d_lat = vc.d_coordinate[1]
     if lock_on:
         vc.update_server_input(theta, phi, False)
         vc.main()
-    vc.update_fixhawk_input(roll, yaw, pitch, height, d_long, d_lat)
+    vc.update_autopilot_input(roll, yaw, pitch, height, d_long, d_lat)
     vc.update_server_input(theta, phi, lock_on)
     vc.main()
-    print(vc.d_roll, vc.d_yaw, vc.d_pitch)
 
     #Target coordinate as a point
     if lock_on:
@@ -168,6 +169,8 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
 
     x_diff = np.tan(np.deg2rad(coord_diff[1])) * vc.earth_radius_at_lat(d_lat)
     y_diff = np.tan(np.deg2rad(coord_diff[0])) * vc.earth_radius_at_lat(d_lat)
+    
+    print("aimcoord: ", vc.aim_coordinate, "js")
 
     p_3dcoordinate = np.matrix([[x_diff], [y_diff], [-height]])
 
@@ -178,8 +181,16 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     fig = plt.figure()
     ax = fig.gca(projection='3d', xlim=(-1 * SIZE, SIZE), ylim=(-1 * SIZE, SIZE),
     zlim=(-SIZE,SIZE), autoscale_on = False, aspect = 'auto')
-    ax.set_ylabel('Drönarens riktning (y)')
-    ax.set_xlabel('Drönarens riktning (x)')
+    #ax.set_ylabel('Drönarens riktning (y)')
+    #ax.set_xlabel('Drönarens riktning (x)')
+
+    # Hide grid lines
+    ax.grid(False)
+
+    # Hide axes ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
 
     # Plot ground
     point = np.array([[0], [0], [-height]])
@@ -189,17 +200,46 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     p = np.array([point.item(0), point.item(1), point.item(2)])
     n = np.array([normal.item(0), normal.item(1), normal.item(2)])
     d = -p.dot(n)
-    xx, yy = np.meshgrid(range(-SIZE,SIZE+100,100), range(-SIZE,SIZE+100,100),
+    xx, yy = np.meshgrid(range(-SIZE*2,SIZE*2+15,15), range(-SIZE*2,SIZE*2+15,15),
     sparse = True)
+    colors_list = np.empty([len(xx[0]), len(yy)], dtype=list)
+    rownum = 0
+    colnum = 0
+    for row in yy:
+        for col in xx[0]:
+            alpha = 1/(1*(1+np.power(np.e, (-np.sqrt(row[0]**2 + col**2) - 100)/90)))
+            colors_list[rownum, colnum] = [0.1, 0.3, 0.9, 1 - alpha]
+            colnum += 1
+        rownum += 1
+        colnum = 0
+
     z = (-n[0] * xx - n[1] * yy - d) * 1. /n[2]
-    ax.plot_surface(xx, yy, z, alpha = 0.2)
+    ax.plot_surface(xx, yy, z, facecolors=colors_list)
 
     # Plot camera sphere
     u, v = np.mgrid[0:2*np.pi:20j, -np.pi/2:np.pi/2:20j]
     x = (VIEW_SIZE)*np.cos(u)*np.sin(v)
     y = (VIEW_SIZE)*np.sin(u)*np.sin(v)
     z = -(VIEW_SIZE)*np.cos(v)
-    ax.plot_wireframe(x, y, z, color="r", alpha = 0.2)
+    ax.plot_wireframe(x, y, z, color=[0.2, 0.4, 0.2, 0.2])
+
+    # Plot drone
+    xd = [-10,10,0]
+    yd = [-10,-10,20]
+    zd = [0,0,0]
+    verts1 = [list(zip(xd,yd,zd))]
+    coll1 = Poly3DCollection(verts1)
+    coll1.set_color(colors.rgb2hex([1, 0.5, 0.2]))
+    coll1.set_edgecolor('k')
+    xd2 = [0,0,0]
+    yd2 = [-10,-10,20]
+    zd2 = [0,-5,0]
+    verts2 = [list(zip(xd2,yd2,zd2))]
+    coll2 = Poly3DCollection(verts2)
+    coll2.set_color(colors.rgb2hex([0.2, 1, 0.5]))
+    coll2.set_edgecolor('k')
+    ax.add_collection3d(coll2)
+    ax.add_collection3d(coll1)
 
     # Plot target coordinate
     p_3dcoordinate = rot_matrix_inv.dot(p_3dcoordinate)
@@ -213,37 +253,27 @@ def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
     drone_dir_y.item(2)*VIEW_SIZE, marker = '^')
     ax.scatter(0, 0, 0, marker = 'o')
 
-    # Plot drone top
-    drone_dir_z = vc.angular_to_spherical(180, 0)
-    #drone_dir_z = rot_matrix.dot(drone_dir_z)
-    ax.scatter(VIEW_SIZE*drone_dir_z.item(0), VIEW_SIZE*drone_dir_z.item(1),
-    drone_dir_z.item(2)*VIEW_SIZE, marker = '^')
-
-    # Plot drone x
-    drone_dir_x = vc.angular_to_spherical(90, 90)
-    #drone_dir_x = rot_matrix.dot(drone_dir_x)
-    ax.scatter(VIEW_SIZE*drone_dir_x.item(0), VIEW_SIZE*drone_dir_x.item(1),
-    drone_dir_x.item(2)*VIEW_SIZE, marker = '^')
-
     # Plot North
     north = vc.angular_to_spherical(90, 0)
     north = rot_matrix_inv.dot(north)
     ax.scatter(VIEW_SIZE * north.item(0), VIEW_SIZE * north.item(1),
     VIEW_SIZE * north.item(2), marker='o')
-
-    # Plot initial camera angle
-    theta_in, phi_in = vc.theta_in, vc.phi_in
-    cam_dir = vc.angular_to_spherical(theta_in, phi_in)
-    #ax.scatter(VIEW_SIZE*cam_dir.item(0),
-    #VIEW_SIZE*cam_dir.item(1), VIEW_SIZE*cam_dir.item(2),
-    #marker = 'x')
     
-    #Plot final camera angle
+    # Plot final camera angle
     theta_final, phi_final = vc.theta_final, vc.phi_final
     cam_dir_final = vc.angular_to_spherical(theta_final, phi_final)
     #cam_dir_final = rot_matrix.dot(cam_dir)
     ax.scatter(VIEW_SIZE*cam_dir_final.item(0),
     VIEW_SIZE*cam_dir_final.item(1), VIEW_SIZE*cam_dir_final.item(2),
     marker = 'x')
+
+    # Plot connection between drone and camera aim
+    if not lock_on:
+        ax.plot([VIEW_SIZE*cam_dir_final.item(0), 0],
+                [VIEW_SIZE*cam_dir_final.item(1), 0],
+                [VIEW_SIZE*cam_dir_final.item(2), 0], c='r')
+    else:
+        ax.plot([p_3dcoordinate.item(0), 0],
+                [p_3dcoordinate.item(1), 0],
+                [p_3dcoordinate.item(2), 0], c='r')
     plt.show()
-   

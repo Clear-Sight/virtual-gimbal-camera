@@ -1,11 +1,12 @@
 {
-"input_domain": "localhost:24474",
-"output_domain": "localhost:7777",
+"input_domain": "178.174.148.6:24474",
+"output_domain": "178.174.148.6:7777",
 "debug": false,
 "local": false,
 "cam_width": 640,
 "cam_height": 480,
 "cam_input": 0,
+"autopilot_update_frequency": 0.005,
 "logging":true,
 "input_check_frequency": 0.2
 }
