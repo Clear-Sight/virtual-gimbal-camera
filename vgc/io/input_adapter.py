@@ -6,7 +6,7 @@ that featches messages from server
 import threading
 import time
 import requests
-
+from .log import logger
 from ..config import CONFIG
 
 class InputAdapter:
@@ -31,10 +31,15 @@ class InputAdapter:
 
     def get_usr_input(self):
         """ Fetch user input from web server via GET request. """
-        req = requests.get(
-            f'http://{CONFIG["input_domain"]}/drone/user/fetch')
         self.usr_msg = self.DEFAULT_USR_MSG
-        if req.ok:
+        try:
+            req = requests.get(
+                f'http://{CONFIG["input_domain"]}/drone/user/fetch')    
+        except HTTPError as http_err:
+            logger.error(f'HTTP error occurred: {http_err}')
+        except Exception as err:
+            logger.error(f'Other error occurred: {err}')
+        else:
             self.usr_msg = req.json()
         return self.usr_msg
 
