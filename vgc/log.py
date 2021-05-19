@@ -1,6 +1,6 @@
 """
  this module keeps the loggers for
- vgc and saves them to the .logs folder
+ vgc and saves them to the .logs/*.log folder
 """
 
 import logging
