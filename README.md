@@ -16,7 +16,7 @@ and then
 ```bash
 python3 -m venv env
 source env/bin/activate
-pip3 install -r requirements.txt
+sudo sh install.sh 
 ```
 You will need to modify the `config.json` for setting upp the configuration that will work for you. 
 
@@ -35,6 +35,20 @@ sh run.sh
 python3 -m vgc
 ```
 
+## Error logs 
+
+If you run in to problems you can checkout the `.logs/` 
+```bash
+cd vgc/.logs/
+tree 
+.
+├── log.txt
+├── vgc-04-21-2021.log
+├── vgc-04-29-2021.log
+├── vgc-05-03-2021.log
+└── vgc-05-19-2021.log
+```
+
 ## Testing 
 We use `pytest` for testing. Make sure that you are in a virtual environment with all the `requirements.txt` installed. Make sure that you are in the virtual-gimbal-camera directory, then you can simply run the command: 
 ```bash
@@ -45,7 +59,8 @@ pytest
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Clear-Sight/virtual-gimbal-camera/blob/development/README.md) file for details.
 
 ## Contributing
-Contributing to the project is limited due to it bing a bachelor's project for a certian time peroid se the [contributing.md](https://github.com/Clear-Sight/drone-feed-cropping/blob/development/.github/contributing.md) for more ditalis. 
+Contributing to the project is limited due to it bing a bachelor's project for a certian time peroid se the [contributing.md](https://github.com/Clear-Sight/drone-feed-cropping/blob/development/.github/contributing.md) for more ditalis.
+Checkout our [contributors](https://github.com/orgs/Clear-Sight/people).
 
 ## Coding style 
 The project follows the standard notation for Python [PEP8](https://pep8.org/).

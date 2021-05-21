@@ -1,5 +1,17 @@
 #!/bin/bash
-sudo ln -s ${PWD}/run.sh ~/.config/autostart
+
+echo "Do you want to install auto start for vgc?[y/n]:" 
+read answer
+case $answer in
+y|Y|yes)
+sudo ln -s ${PWD}/run.sh ~/.config/autostart 
+echo "run.sh has been added to ~/.config/autostart. Done."
+;;
+*)
+echo "Skipping auto start. Done."
+;;
+esac
+
 gcc -shared -o ./vgc/trigonometric_fast.so -fPIC ./vgc/trigonometric_fast.c
 python -m pip install --upgrade pip
 pip3 install --upgrade future lxml
