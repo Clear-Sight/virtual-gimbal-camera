@@ -35,7 +35,7 @@ sh run.sh
 python3 -m vgc
 ```
 
-## Error handeling 
+## Error logs 
 
 If you run in to problems you can checkout the `.logs/` 
 ```bash
