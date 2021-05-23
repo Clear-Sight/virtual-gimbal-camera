@@ -9,7 +9,7 @@ import base64
 import cv2
 import zmq
 from ..config import CONFIG
-
+from ..log import logger
 
 
 class OutputAdapter:
@@ -18,6 +18,7 @@ class OutputAdapter:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
         self.socket.connect(f'tcp://{CONFIG["output_domain"]}')
+        logger.info(f'connect::tcp://{CONFIG["output_domain"]}')
 
     def send(self, frame):
         """ sends a frame to the set domain in CONFIG """
@@ -26,4 +27,8 @@ class OutputAdapter:
         self.socket.send(image)
 
     def __del__(self):
-        self.socket.__del__()
+        """
+        destoy context for output. NOT threadsafe,
+        but should only be one zmq connected so OK.
+        """
+        self.context.zmq_close()
