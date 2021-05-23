@@ -144,31 +144,29 @@ def get_target_coordinate(coord):
     vc.main()
     return(vc.aim_coordinate[0], vc.aim_coordinate[1])
 
-def plot(p_long, p_lat, roll, yaw, pitch, theta, phi, lock_on, height):
+def plot(roll, yaw, pitch, lon, lat, height, theta, phi, lock_on, redraw = False):
     """
     This function plots the drone and its field of view. Red dot is
     north, orange triangle is direction of drone, the X is where the
     camera is aiming and blue triangle is the coordinate it focuses on,
     if lock_on is true.
     """
-    d_long = vc.d_coordinate[0]
-    d_lat = vc.d_coordinate[1]
-    if lock_on:
+    if lock_on and not redraw:
         vc.update_server_input(theta, phi, False)
         vc.main()
-    vc.update_autopilot_input(roll, yaw, pitch, height, d_long, d_lat)
+    vc.update_autopilot_input(roll, yaw, pitch, height, lon, lat)
     vc.update_server_input(theta, phi, lock_on)
     vc.main()
 
     #Target coordinate as a point
     if lock_on:
-        coord_diff = (vc.aim_coordinate[0] - d_long,
-        vc.aim_coordinate[1] - d_lat)
+        coord_diff = (vc.aim_coordinate[0] - lon,
+        vc.aim_coordinate[1] - lat)
     else:
-        coord_diff = (p_long - d_long, p_lat - d_lat)
+        coord_diff = (0, 0)
 
-    x_diff = np.tan(np.deg2rad(coord_diff[1])) * vc.earth_radius_at_lat(d_lat)
-    y_diff = np.tan(np.deg2rad(coord_diff[0])) * vc.earth_radius_at_lat(d_lat)
+    x_diff = np.tan(np.deg2rad(coord_diff[1])) * vc.earth_radius_at_lat(lat)
+    y_diff = np.tan(np.deg2rad(coord_diff[0])) * vc.earth_radius_at_lat(lat)
     
     print("aimcoord: ", vc.aim_coordinate, "js")
 
