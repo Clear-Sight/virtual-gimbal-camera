@@ -1,1 +1,1 @@
-This is keeps all the logs of VGC system.
+Logs for VGC system
