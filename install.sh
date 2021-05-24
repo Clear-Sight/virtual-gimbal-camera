@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Do you want to install auto start for vgc?[y/n]:" 
+echo "Do you want to install auto boot start for vgc?[y/n]:" 
 read answer
 case $answer in
 y|Y|yes)
